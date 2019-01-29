@@ -8,7 +8,7 @@
     <v-toolbar-title class="secondary--text display-2">Walidean</v-toolbar-title>
     <v-spacer></v-spacer>
     <router-link class="secondary--text" to="/">Home</router-link>
-    <router-link class="secondary--text" to="/clientForm">FormularioCliente</router-link>
+    <router-link class="secondary--text" to="/ClientDataRequest">ClientDataRequest</router-link>
     <v-btn icon>
       <v-icon color="secondary">close</v-icon>
     </v-btn>

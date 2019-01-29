@@ -1,6 +1,6 @@
 <template>
 <div>
-  <v-form v-model="valid">
+  <v-form>
     <v-container text-xs-center>
       <v-layout align-center justify-space-around row fill-height>
         <v-flex xs12 sm8>
