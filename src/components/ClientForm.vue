@@ -24,6 +24,7 @@
 
 <script>
 import axios from 'axios';
+import { mapState } from 'vuex';
 import consts from '../consts.js';
 export default {
   data() {
@@ -63,7 +64,7 @@ export default {
         .then((response) => {})
     },
     getClient() {
-      this.$store.dispatch('setClientDataAsync', this.idUserFound).then(() => {
+      this.$store.dispatch('setClientDataAsync', this.idUserFound, this.token).then(() => {
         //pasar al siguiente modulo
         console.log("Cambiando de ruta");
         this.$router.push('/client', () => console.log('Ruta cambiada')); // Home

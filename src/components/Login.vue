@@ -34,7 +34,7 @@ export default {
           console.log(response)
           if (response.status == 200) {
             console.log("Login Correcto");
-            //this.$router.push('/formularioCliente', () => console.log('Ruta /formularioCliente'));
+            this.$router.push('/ClientDataRequest', () => console.log('Ruta /ClientDataRequest'));
           }
         })
     }
