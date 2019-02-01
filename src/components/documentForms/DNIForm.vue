@@ -39,6 +39,7 @@
         </v-radio-group>
       </v-flex>
     </v-layout>
+    <v-btn round color="secondary" class="primary--text" small dark>Submit Document</v-btn>
   </v-container>
 </v-form>
 </template>

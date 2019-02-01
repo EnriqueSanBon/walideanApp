@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import ClientDataRequest from './views/ClientDataRequest.vue'
 import UploadFile from './views/UploadFile.vue'
 import Client from './views/Client.vue'
+import Document from './views/Document.vue'
 
 Vue.use(Router)
 
@@ -24,6 +25,10 @@ export default new Router({
       path: '/UploadFile',
       name: 'uploadFile',
       component: UploadFile
+    },
+    {
+      path: '/document/:id',
+      component: Document
     },
     {
       path: '/about',

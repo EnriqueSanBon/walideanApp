@@ -32,9 +32,9 @@ mock.onGet('http://localhost:8080/PVIService/resources/users/3').reply(200, {
 mock.onGet('http://localhost:8080/PVIService/resources/users/3/documents').reply(200, {
   documents: [{
       "id": "1",
-      "docType": "Paysheet",
+      "docType": "AAAPrueba",
       "processDate": 20181114,
-      "expirationDate": 20191114
+      "expirationDate": 21191114
     },
     {
       "id": "2",

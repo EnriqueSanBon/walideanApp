@@ -1,6 +1,6 @@
 <template>
 <v-card>
-  <v-img src="https://pbs.twimg.com/profile_images/697035383679295488/_6vl74tM_400x400.png" aspect-ratio="1.5"></v-img>
+  <v-img src="https://pbs.twimg.com/profile_images/697035383679295488/_6vl74tM_400x400.png" aspect-ratio="2.0"></v-img>
   <v-card-title primary-title>
     <div>
       <h3 class="headline mb-0">YOUR TRUSTED DISTRIBUTED AND SECURED USER DATA STORAGE</h3>

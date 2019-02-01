@@ -5,12 +5,16 @@
     <td class="text-xs">{{ props.item.expirationDate }}</td>
     <td class="text-xs">{{ props.item.processDate }}</td>
     <td class="justify-center layout px-0">
-      <v-icon class="mr-2" @click="navigateToVal(props.item)">
-        mobile_friendly
-      </v-icon>
-      <v-icon @click="navigateToDoc(props.item)">
-        wallpaper
-      </v-icon>
+      <v-btn icon>
+        <v-icon class="mr-2" @click="navigateToVal(props.item.id)">
+          mobile_friendly
+        </v-icon>
+      </v-btn>
+      <v-btn icon>
+        <v-icon @click="navigateToDoc(props.item.id)">
+          wallpaper
+        </v-icon>
+      </v-btn>
     </td>
   </template>
 </v-data-table>
@@ -46,8 +50,8 @@ export default {
   },
   methods: {
     navigateToDoc: function(id) {
-      console.log("View Logo clicado");
-      //this.$router.push('/document/:' + id, () => console.log('Ruta cambiada')); // Home
+      console.log("navigateToDoc con id " + id);
+      this.$router.push('/document/:' + id, () => console.log('Ruta cambiada')); // Home
     },
     navigateToVal: function(id) {
       console.log("Validations Logo clicado");
