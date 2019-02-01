@@ -10,7 +10,7 @@
 
 
 <script>
-import DocumentInfo from '../components/DocumentInfo'
+import DocumentInfo from '../components/DocumentComponents/DocumentInfo'
 
 export default {
   components: { DocumentInfo },

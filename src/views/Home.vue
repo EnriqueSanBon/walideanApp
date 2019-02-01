@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import Login from '../components/Login'
-import SideInfo from '../components/SideInfo'
+import Login from '../components/LoginComponents/Login'
+import SideInfo from '../components/LoginComponents/SideInfo'
 
 export default {
   components: {

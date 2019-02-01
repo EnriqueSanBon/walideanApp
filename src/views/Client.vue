@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import ClientInfo from '../components/ClientInfo'
-import ClientDocumentsTable from '../components/ClientDocumentsTable'
+import ClientInfo from '../components/GenericComponents/ClientInfo'
+import ClientDocumentsTable from '../components/ClientComponents/ClientDocumentsTable'
 
 export default {
   components: { ClientInfo, ClientDocumentsTable },

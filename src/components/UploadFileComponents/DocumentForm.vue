@@ -24,13 +24,13 @@
 
 <script>
 import { mapState } from 'vuex';
-import consts from '../consts.js';
-import DNIForm from '../components/documentForms/DNIForm';
-import LaboralLifeForm from '../components/documentForms/LaboralLifeForm';
-import LisenceForm from '../components/documentForms/LisenceForm';
-import PassportForm from '../components/documentForms/PassportForm';
-import RosterForm from '../components/documentForms/RosterForm';
-import SanitaryForm from '../components/documentForms/SanitaryForm';
+import consts from '../../consts.js';
+import DNIForm from '../../components/DocumentForms/DNIForm';
+import LaboralLifeForm from '../../components/DocumentForms/LaboralLifeForm';
+import LisenceForm from '../../components/DocumentForms/LisenceForm';
+import PassportForm from '../../components/DocumentForms/PassportForm';
+import RosterForm from '../../components/DocumentForms/RosterForm';
+import SanitaryForm from '../../components/DocumentForms/SanitaryForm';
 
 export default {
   components: { DNIForm, LaboralLifeForm, LisenceForm, PassportForm, RosterForm, SanitaryForm },

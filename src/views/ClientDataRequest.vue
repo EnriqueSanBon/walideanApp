@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import ClientForm from '../components/ClientForm'
+import ClientForm from '../components/ClientDataRequestComponents/ClientForm'
 
 export default {
   components: {

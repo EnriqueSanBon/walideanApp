@@ -16,7 +16,7 @@
 <script>
 import { mapState } from 'vuex';
 import axios from 'axios';
-import consts from '../consts.js';
+import consts from '../../consts.js';
 export default {
   computed: mapState(['clientData']),
   mounted() {

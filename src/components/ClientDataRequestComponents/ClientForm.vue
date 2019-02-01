@@ -25,7 +25,7 @@
 <script>
 import axios from 'axios';
 import { mapState } from 'vuex';
-import consts from '../consts.js';
+import consts from '../../consts.js';
 export default {
   data() {
     return {
