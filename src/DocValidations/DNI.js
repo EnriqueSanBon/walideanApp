@@ -1,0 +1,3 @@
+export default {
+  validations: ['El numero de identificacion ha sido reconocido', 'No ha caducado', 'El numero de identificacion introducido por el usuario en el anverso del documento coincide con el reverso', 'El nombre introducido por el usuario en el anverso del documento coincide con el reverso', 'Los apellidos introducidos por el usuario en el anverso del documento coinciden con el reverso', 'La fecha de caducidad introducida por el usuario en el anverso del documento coinciden con el reverso', 'Los metadatos no indican manipulacion']
+}

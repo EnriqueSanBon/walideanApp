@@ -33,13 +33,7 @@ export default {
   data() {
     return {
       searchQuery: '',
-      gridData: [
-        /*
-                { Tipo: 'Nomina', Numero: 12355568 },
-                { Tipo: 'DNI', Numero: '523698978A' },
-                { Tipo: 'Nomina', Numero: 25558745 },
-                { Tipo: 'Carnet', Numero: 5888878 }*/
-      ],
+      gridData: [],
       headers: [
         { text: 'Document type', align: 'left', value: 'docType' },
         { text: 'Expiration Date', value: 'expirationDate' },
@@ -55,7 +49,7 @@ export default {
     },
     navigateToVal: function(id) {
       console.log("Validations Logo clicado");
-      //this.$router.push('/document/:' + id + '/validations', () => console.log('Ruta cambiada')); // Home
+      this.$router.push('/document/:' + id + '/validations', () => console.log('Ruta cambiada')); // Home
     },
     getDocuments() {
       let config = {

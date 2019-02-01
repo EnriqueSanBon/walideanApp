@@ -20,7 +20,6 @@ import consts from '../../consts.js';
 export default {
   computed: mapState(['clientData']),
   mounted() {
-    console.log("Mounted");
     this.getDocument();
   },
   data() {

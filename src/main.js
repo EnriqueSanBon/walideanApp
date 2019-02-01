@@ -115,15 +115,45 @@ mock.onGet('http://localhost:8080/PVIService/resources/users/3/documents/:1').re
 mock.onGet('http://localhost:8080/PVIService/resources/users/3/documents/:1/validations').reply(200, {
   validations: [{
       id: 1,
-      description: "Descripcon de la validacion 1",
+      description: "El numero de identificacion ha sido reconocido",
       timestamp: "20171231",
       securityLevel: "ALTO"
     },
     {
       id: 2,
-      description: "Descripcon de la validacion 2",
-      timestamp: "20171120",
-      securityLevel: "MEDIO"
+      description: "No ha caducado",
+      timestamp: "20121120",
+      securityLevel: "ALTO"
+    },
+    {
+      id: 3,
+      description: "El numero de identificacion introducido por el usuario en el anverso del documento coincide con el reverso",
+      timestamp: "20131120",
+      securityLevel: "ALTO"
+    },
+    {
+      id: 4,
+      description: "El nombre introducido por el usuario en el anverso del documento coincide con el reverso",
+      timestamp: "20141120",
+      securityLevel: "ALTO"
+    },
+    {
+      id: 5,
+      description: "Los apellidos introducidos por el usuario en el anverso del documento coinciden con el reverso",
+      timestamp: "20151120",
+      securityLevel: "ALTO"
+    },
+    {
+      id: 6,
+      description: "La fecha de caducidad introducida por el usuario en el anverso del documento coinciden con el reverso",
+      timestamp: "20161120",
+      securityLevel: "ALTO"
+    },
+    {
+      id: 7,
+      description: "Los metadatos no indican manipulacion",
+      timestamp: "20191120",
+      securityLevel: "ALTO"
     }
   ]
 });

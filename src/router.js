@@ -5,6 +5,8 @@ import ClientDataRequest from './views/ClientDataRequest.vue'
 import UploadFile from './views/UploadFile.vue'
 import Client from './views/Client.vue'
 import Document from './views/Document.vue'
+import Validations from './views/Validations.vue'
+import ValidateDocument from './views/ValidateDocument.vue'
 
 Vue.use(Router)
 
@@ -29,6 +31,12 @@ export default new Router({
     {
       path: '/document/:id',
       component: Document
+    }, {
+      path: '/document/:id/validations',
+      component: Validations
+    }, {
+      path: '/UploadFile/:id/validateDocument',
+      component: ValidateDocument
     },
     {
       path: '/about',
