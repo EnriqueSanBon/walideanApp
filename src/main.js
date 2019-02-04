@@ -157,3 +157,4 @@ mock.onGet('http://localhost:8080/PVIService/resources/users/3/documents/:1/vali
     }
   ]
 });
+mock.onAny().passThrough();

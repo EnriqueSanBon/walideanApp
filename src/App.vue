@@ -1,5 +1,5 @@
 <template>
-<v-app>
+<v-app :dark="goDark">
   <v-toolbar app color="primary">
     <v-btn icon>
       <v-icon color="secondary" @click="$router.go(-1)">arrow_back</v-icon>
@@ -12,6 +12,9 @@
     <v-spacer></v-spacer>
     <router-link class="secondary--text" to="/">Home</router-link>
     <router-link class="secondary--text" to="/ClientDataRequest">ClientDataRequest</router-link>
+    <v-btn icon>
+      <v-icon color="secondary" @click="goDark=!goDark">brightness_medium</v-icon>
+    </v-btn>
     <v-btn icon>
       <v-icon color="secondary" @click="$router.push('/')">close</v-icon>
     </v-btn>
@@ -32,7 +35,9 @@ export default {
   name: 'App',
   components: {},
   data() {
-    return {}
+    return {
+      goDark: false
+    }
   }
 }
 </script>
