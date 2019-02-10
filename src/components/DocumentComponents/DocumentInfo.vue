@@ -1,7 +1,7 @@
 <template>
 <v-card>
   <v-card-title>
-    <h4>Client Data</h4>
+    <h4>Document Data</h4>
   </v-card-title>
   <v-divider></v-divider>
   <v-list dense>
@@ -14,7 +14,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {
+  mapState
+} from 'vuex';
 import axios from 'axios';
 import consts from '../../consts.js';
 export default {
