@@ -6,9 +6,11 @@ Vue.use(Vuex);
 export const store = new Vuex.Store({
   state: {
     clientData: null,
+    docsPurchased: []
   },
   mutations: {
     setClientData: (state, clientData) => state.clientData = clientData,
+    addDoc: (state, docId) => state.docsPurchased.push(docId)
   },
   actions: {
     setClientDataAsync: (context, idUserFound, token) => {
@@ -31,6 +33,10 @@ export const store = new Vuex.Store({
               reject(error);
             })
       })
+    },
+    addDocAsync: (context, docId) => {
+      context.commit('addDoc', docId);
     }
-  }
+  },
+
 });

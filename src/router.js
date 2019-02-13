@@ -7,6 +7,7 @@ import Client from './views/Client.vue'
 import Document from './views/Document.vue'
 import Validations from './views/Validations.vue'
 import ValidateDocument from './views/ValidateDocument.vue'
+import Statics from './views/Statics.vue'
 
 Vue.use(Router)
 
@@ -37,6 +38,9 @@ export default new Router({
     }, {
       path: '/UploadFile/:id/validateDocument',
       component: ValidateDocument
+    }, {
+      path: '/Statics/',
+      component: Statics
     },
     {
       path: '/about',

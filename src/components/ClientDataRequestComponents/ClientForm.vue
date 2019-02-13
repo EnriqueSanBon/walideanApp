@@ -24,7 +24,6 @@
 
 <script>
 import axios from 'axios';
-import { mapState } from 'vuex';
 import consts from '../../consts.js';
 export default {
   data() {
@@ -52,8 +51,6 @@ export default {
           if (response.data.usersCount == '1') {
             this.idUserFound = response.data.idList[0];
             this.sendToken();
-          } else {
-            console.log("Mal especificados los parametros");
           }
         })
     },
@@ -65,8 +62,6 @@ export default {
     },
     getClient() {
       this.$store.dispatch('setClientDataAsync', this.idUserFound, this.token).then(() => {
-        //pasar al siguiente modulo
-        console.log("Cambiando de ruta");
         this.$router.push('/client', () => console.log('Ruta cambiada')); // Home
       })
     }

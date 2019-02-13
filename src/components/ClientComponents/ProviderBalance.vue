@@ -29,6 +29,9 @@
       <v-list-tile-content class="align-end">{{animatedCirculationWLD}}</v-list-tile-content>
     </v-list-tile>
   </v-list>
+  <v-card-actions>
+    <v-btn flat color="secondary" @click="$router.push('/Statics');">Blockchain movements</v-btn>
+  </v-card-actions>
 </v-card>
 </template>
 

@@ -12,8 +12,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import axios from 'axios';
 import ClientInfo from '../components/GenericComponents/ClientInfo'
 import DocumentForm from '../components/UploadFileComponents/DocumentForm'
 export default {
