@@ -9,32 +9,27 @@
       <td class="text-xs">{{ props.item.doc }}</td>
       <td class="text-xs">{{ props.item.date }}</td>
       <td class="text-xs">
-        <a :href="props.item.transactionHash">See transaction</a>
+        <a :href="props.item.transactionHash" target="_blank">See transaction</a>
       </td>
     </template>
   </v-data-table>
   <v-layout align-center justify-space-around row fill-height wrap>
-    <v-flex xs12 sm6>
-      <v-sparkline :show-labels="false" :fill="fill" :gradient="gradient" :line-width="width" :padding="padding" :smooth="radius || false" :value="incomeChartValues" auto-draw></v-sparkline>
+    <v-flex xs12 sm12>
+      <line-chart :chart-data="datacollection" :options="chartOptions" :height="90"></line-chart>
     </v-flex>
-    <v-flex xs12 sm6>
-      <v-sparkline :fill="fill" :gradient="gradient" :line-width="width" :padding="padding" :smooth="radius || false" :value="outcomeChartValues" auto-draw></v-sparkline>
-    </v-flex>
+
   </v-layout>
 </div>
 </template>
 
 <script>
 import axios from 'axios';
-const gradients = [
-  ['#222'],
-  ['#42b3f4'],
-  ['red', 'orange', 'yellow'],
-  ['purple', 'violet'],
-  ['#00c6ff', '#F0F', '#FF0'],
-  ['#f72047', '#ffd200', '#1feaea']
-]
+import LineChart from '../../components/Charts/LineChart.vue'
+
 export default {
+  components: {
+    LineChart
+  },
   mounted() {
     this.getStatics();
   },
@@ -50,19 +45,18 @@ export default {
         { text: 'Date', value: 'date' },
         { text: 'URL', value: 'transactionHash' }
       ],
-
-      fill: true,
-      gradient: gradients[4],
-      gradients,
-      padding: 8,
-      radius: 0,
-      incomeChartValues: [0, 0],
-      outcomeChartValues: [0, 0],
-      width: 0.5
+      datacollection: null,
+      labels: [],
+      dataset0: [],
+      dataset1: [],
+      chartOptions: {
+        aspectRatio: 0.5
+      }
     }
   },
   methods: {
     getStatics() {
+      var dateArray = this.getDateArray(Date.now() - 2629750000, Date.now())
       let config = {
         params: {
           'module': 'logs',
@@ -77,13 +71,11 @@ export default {
       }
       axios.get('https://api-ropsten.etherscan.io/api', config)
         .then((response) => {
-          console.log("Consulta Estadistcias");
-          console.log(response.data);
-
           this.gridData = response.data.result.sort(function(a, b) {
-            return parseInt(b.timeStamp, 16) - parseInt(a.timeStamp, 16);
+            return parseInt(a.timeStamp, 16) - parseInt(b.timeStamp, 16);
           });
           this.gridData = this.gridData.map((obj) => {
+            //Format response
             var formatedObj = {};
             formatedObj.date = new Date(0);
             formatedObj.date.setUTCSeconds(parseInt(obj.timeStamp, 16));
@@ -95,23 +87,53 @@ export default {
             if (obj.topics[3]) {
               formatedObj.doc = parseInt(obj.topics[3], 16);
             }
-            if (obj.topics[1] == '0x000000000000000000000000b078a8db38dfb6b298a215a92e96a7eeafb4ff5b') {
-              this.outcomeChartValues.push(formatedObj.WLD)
-            } else {
-              this.incomeChartValues.push(formatedObj.WLD)
+            //compose chart arrays
+            var formatedDate = formatedObj.date.getDate() + '/' + (formatedObj.date.getMonth() + 1) + '/' + formatedObj.date.getFullYear();
+            var indexInDates = dateArray.findIndex(elem => elem.date === formatedDate);
+            if (indexInDates >= 0) {
+              if (obj.topics[1] == '0x000000000000000000000000b078a8db38dfb6b298a215a92e96a7eeafb4ff5b') {
+                dateArray[indexInDates].out += formatedObj.WLD
+              } else {
+                dateArray[indexInDates].in += formatedObj.WLD
+              }
             }
             return formatedObj
           })
-
-          console.log("Formateado");
-          console.log(this.gridData);
-          console.log("Chart Data");
-          console.log(this.chartValues);
+          dateArray.map((obj) => {
+            this.labels.push(obj.date)
+            this.dataset0.push(obj.out)
+            this.dataset1.push(obj.in)
+          })
+          this.datacollection = {
+            labels: this.labels,
+            datasets: [{
+              label: 'Purchases',
+              backgroundColor: '#51B189',
+              data: this.dataset0
+            }, {
+              label: 'Sales',
+              backgroundColor: '#FADF70',
+              data: this.dataset1
+            }]
+          }
         })
+    },
+    getDateArray(start, end) {
+      var arr = []
+      var dt = new Date(start);
+      while (dt <= end) {
+        var element = {
+          date: null,
+          out: 0,
+          in: 0
+        }
+        var now = new Date(dt)
+        element.date = now.getDate().toString() + '/' + (now.getMonth() + 1).toString() + '/' + now.getFullYear().toString()
+        arr.push(element);
+        dt.setDate(dt.getDate() + 1);
+      }
+      return arr;
     }
   }
 }
 </script>
-
-
-https://api-ropsten.etherscan.io/api?module=logs&action=getLogs&address=0xAcb75E759725816629b112927220b2d664808BB2&fromBlock=4935210&toBlock=latest&topic1=0x000000000000000000000000b078a8db38dfb6b298a215a92e96a7eeafb4ff5b&topic2=0x000000000000000000000000b078a8db38dfb6b298a215a92e96a7eeafb4ff5b&topic1_2_opr=or
