@@ -16,6 +16,8 @@
 
 <script>
 import axios from 'axios';
+import firebase from "firebase";
+
 export default {
   data() {
     return {
@@ -26,6 +28,29 @@ export default {
   },
   methods: {
     loginUser() {
+      var context = this;
+      //this should be on the then
+      var firestore = firebase.firestore();
+      var providersRef = firestore.collection("providers");
+      providersRef.where("userId", "==", this.user).get().then((querySnapshot) => {
+          console.log(querySnapshot);
+          if (querySnapshot.size == 1) {
+            querySnapshot.forEach(function(doc) {
+              // doc.data() is never undefined for query doc snapshots
+              console.log(doc.data());
+              console.log(doc.data().ethAddress);
+              context.$store.dispatch('setEthAddressAsync', doc.data().ethAddress).then(() => {
+                context.$router.push('/ClientDataRequest', () => console.log('Ruta /ClientDataRequest'));
+              });
+            });
+          } else {
+            console.log("Usuario introducido incorrecto");
+          }
+        })
+        .catch(function(error) {
+          console.log("Error getting documents: ", error);
+        });
+
       axios.post('http://localhost:8080/PVIService/resources/authenticate', {
           "user": this.user,
           "pass": this.pass

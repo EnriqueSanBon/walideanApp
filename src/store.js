@@ -6,10 +6,12 @@ Vue.use(Vuex);
 export const store = new Vuex.Store({
   state: {
     clientData: null,
+    ethAddress: null,
     docsPurchased: []
   },
   mutations: {
     setClientData: (state, clientData) => state.clientData = clientData,
+    setEthAddress: (state, ethAddress) => state.ethAddress = ethAddress,
     addDoc: (state, docId) => state.docsPurchased.push(docId)
   },
   actions: {
@@ -36,6 +38,9 @@ export const store = new Vuex.Store({
     },
     addDocAsync: (context, docId) => {
       context.commit('addDoc', docId);
+    },
+    setEthAddressAsync: (context, ethAddress) => {
+      context.commit('setEthAddress', ethAddress);
     }
   },
 

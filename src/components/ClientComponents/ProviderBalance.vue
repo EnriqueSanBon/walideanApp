@@ -38,6 +38,8 @@
 <script>
 import axios from 'axios';
 import consts from '../../consts.js';
+import { mapState } from 'vuex';
+
 export default {
   components: {},
   mounted() {
@@ -61,7 +63,7 @@ export default {
       tweenedCirculationWLD: 0,
       metamaskState: false,
       abi: consts.abi,
-      contractAddress: consts.contractAddress
+      contractAddress: this.ethAddress
     }
   },
   computed: {
@@ -73,6 +75,9 @@ export default {
     },
     animatedCirculationWLD: function() {
       return this.tweenedCirculationWLD.toFixed(0);
+    },
+    ethAddress: function() {
+      return this.$store.state.ethAddress;
     }
   },
   watch: {
