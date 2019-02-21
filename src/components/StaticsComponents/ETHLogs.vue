@@ -24,9 +24,11 @@
 
 <script>
 import axios from 'axios';
+import { mapState } from 'vuex';
 import LineChart from '../../components/Charts/LineChart.vue'
 
 export default {
+  computed: mapState(['ethAddress']),
   components: {
     LineChart
   },
@@ -51,12 +53,16 @@ export default {
       dataset1: [],
       chartOptions: {
         aspectRatio: 0.5
-      }
+      },
+      ethAddressFormated: null
     }
   },
   methods: {
     getStatics() {
-      var dateArray = this.getDateArray(Date.now() - 2629750000, Date.now())
+      this.ethAddressFormated = '0x000000000000000000000000' + this.ethAddress;
+      console.log(this.ethAddressFormated);
+      var dateArray = this.getDateArray(Date.now() - 2629750000, Date.now());
+      var context = this;
       let config = {
         params: {
           'module': 'logs',
@@ -64,8 +70,8 @@ export default {
           'address': '0xAcb75E759725816629b112927220b2d664808BB2', //contract
           'fromBlock': '4935210', //genesis block
           'toBlock': 'latest',
-          'topic1': '0x000000000000000000000000b078a8db38dfb6b298a215a92e96a7eeafb4ff5b', //From
-          'topic2': '0x000000000000000000000000b078a8db38dfb6b298a215a92e96a7eeafb4ff5b', //To
+          'topic1': this.ethAddressFormated, //From
+          'topic2': this.ethAddressFormated, //To
           'topic1_2_opr': 'or' //type
         }
       }
@@ -91,7 +97,7 @@ export default {
             var formatedDate = formatedObj.date.getDate() + '/' + (formatedObj.date.getMonth() + 1) + '/' + formatedObj.date.getFullYear();
             var indexInDates = dateArray.findIndex(elem => elem.date === formatedDate);
             if (indexInDates >= 0) {
-              if (obj.topics[1] == '0x000000000000000000000000b078a8db38dfb6b298a215a92e96a7eeafb4ff5b') {
+              if (obj.topics[1] == context.ethAddressFormated) {
                 dateArray[indexInDates].out += formatedObj.WLD
               } else {
                 dateArray[indexInDates].in += formatedObj.WLD

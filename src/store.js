@@ -1,33 +1,40 @@
 import Vue from 'vue';
+import consts from './consts.js';
 import Vuex from 'vuex';
 import axios from 'axios';
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
   state: {
+    token: null,
     clientData: null,
     ethAddress: null,
     docsPurchased: []
   },
   mutations: {
+    setToken: (state, token) => state.token = token,
     setClientData: (state, clientData) => state.clientData = clientData,
     setEthAddress: (state, ethAddress) => state.ethAddress = ethAddress,
     addDoc: (state, docId) => state.docsPurchased.push(docId)
   },
   actions: {
-    setClientDataAsync: (context, idUserFound, token) => {
+    setClientDataAsync: (context, data) => {
+      console.log("token y idUserFound en store");
+      console.log(data.idUserFound);
+      console.log(data.token);
       let config = {
         headers: {
-          'securityCode': token
-        }
+          'securityCode': data.token
+        },
+        withCredentials: true
       }
       return new Promise((resolve, reject) => {
-        axios.get('http://localhost:8080/PVIService/resources/users/' + idUserFound, config)
+        axios.get(consts.ipPVIService + 'resources/users/' + data.idUserFound, config)
           .then((response) => {
               console.log("Datos del usuario consultado");
               console.log(response.data);
               console.log("Actualizando el Store con el nuevo Usuario");
-              context.commit('setClientData', response.data.user);
+              context.commit('setClientData', response.data);
               resolve(response);
             },
             error => {
@@ -38,6 +45,9 @@ export const store = new Vuex.Store({
     },
     addDocAsync: (context, docId) => {
       context.commit('addDoc', docId);
+    },
+    setTokenAsync: (context, token) => {
+      context.commit('setToken', token);
     },
     setEthAddressAsync: (context, ethAddress) => {
       context.commit('setEthAddress', ethAddress);

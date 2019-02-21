@@ -11,7 +11,7 @@
           </v-layout>
         </v-flex>
       </v-layout>
-      <v-btn round color="secondary" class="primary--text" small dark>Submit Validation</v-btn>
+      <v-btn round color="secondary" class="primary--text" small dark @click="uploadValidations()">Submit Validation</v-btn>
       <p>{{ selected }}</p>
     </v-container>
   </v-form>
@@ -20,15 +20,41 @@
 
 <script>
 import { mapState } from 'vuex';
+import axios from 'axios';
+import consts from '../../consts.js';
 import DNIValidations from '../../DocValidations/DNI.js';
 
 export default {
+  computed: mapState(['clientData', 'token']),
   data() {
     return {
       DNIValidations: DNIValidations.validations,
       selected: []
     }
   },
-  methods: {}
+  methods: {
+    uploadValidations() {
+      var context = this;
+      let config = {
+        headers: {
+          'securityCode': this.token,
+        },
+        withCredentials: true
+      }
+      this.selected.forEach(function(element) {
+        console.log(element);
+        axios.post(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + context.$route.params.id + '/validations', {
+            "description": element,
+            "timestamp": "20171231",
+            "securityLevel": "ALTO"
+          }, config)
+          .then((response) => {
+            console.log("Respuesta subida validacion");
+            console.log(response.data);
+          })
+      });
+
+    }
+  }
 }
 </script>

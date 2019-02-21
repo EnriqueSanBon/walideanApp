@@ -25,7 +25,7 @@ var config = {
 };
 firebase.initializeApp(config);
 
-var mock = new MockAdapter(axios);
+/*var mock = new MockAdapter(axios);
 mock.onGet('http://localhost:8080/PVIService/resources/users/3').reply(200, {
   user: {
     name: "Pichu",
@@ -119,6 +119,18 @@ mock.onGet('http://localhost:8080/PVIService/resources/users/3/documents/:1').re
   }
 });
 
+mock.onGet('http://localhost:8080/PVIService/resources/users/3/documents/1').reply(200, {
+  data: {
+    userId: "3",
+    userNumberId: "123456789K",
+    docType: "Dni",
+    item: "http://prueba",
+    providerId: "2",
+    processDate: "2017/11/08",
+    expirationDate: "2030/02/05"
+  }
+});
+
 mock.onGet('http://localhost:8080/PVIService/resources/users/3/documents/:1/validations').reply(200, {
   validations: [{
       id: 1,
@@ -165,3 +177,4 @@ mock.onGet('http://localhost:8080/PVIService/resources/users/3/documents/:1/vali
   ]
 });
 mock.onAny().passThrough();
+*/

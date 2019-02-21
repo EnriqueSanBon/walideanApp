@@ -1,7 +1,8 @@
 export default {
-  ipPVIService: '10.0.4.97',
+  ipPVIService: 'http://10.0.3.58:8080/PVIService/',
+  //ipPVIService: 'http://demos2.addalia.com/PVIService/',
   portPVIService: '8080',
-  documentTypes: ['DNI', 'Sanitary', 'Laboral Life', 'Roster', 'License', 'Passport'],
+  documentTypes: ['Dni', 'Sanitary', 'Laboral Life', 'Roster', 'License', 'Passport'],
   countries: ['Afganistán', 'Albania', 'Alemania', 'Andorra', 'Angola', 'AntiguayBarbuda', 'ArabiaSaudita', 'Argelia', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaiyán', 'Bahamas', 'Bangladés', 'Barbados', 'Baréin', 'Bélgica',
     'Belice', 'Benín', 'Bielorrusia', 'Birmania', 'Bolivia', 'BosniayHerzegovina', 'Botsuana', 'Brasil', 'Brunéi', 'Bulgaria', 'BurkinaFaso', 'Burundi', 'Bután', 'CaboVerde', 'Camboya', 'Camerún', 'Canadá', 'Catar', 'Chad', 'Chile',
     'China', 'Chipre', 'CiudaddelVaticano', 'Colombia', 'Comoras', 'CoreadelNorte', 'CoreadelSur', 'CostadeMarfil', 'CostaRica', 'Croacia', 'Cuba', 'Dinamarca', 'Dominica', 'Ecuador', 'Egipto', 'ElSalvador', 'EmiratosÁrabesUnidos',

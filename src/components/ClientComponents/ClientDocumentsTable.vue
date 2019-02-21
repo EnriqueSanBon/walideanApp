@@ -1,29 +1,36 @@
 <template>
 <div>
+  <v-progress-linear v-if="gridData.length==0" :indeterminate="true"></v-progress-linear>
   <v-data-table :headers="headers" :items="gridData" class="elevation-1" color='primary'>
+    <template slot="no-data">
+      <v-alert :value="true" color="error" icon="warning">
+        Sorry, nothing to display here :(
+      </v-alert>
+    </template>
     <template slot="items" slot-scope="props">
       <td>{{ props.item.docType }}</td>
+      <td class="text-xs">{{props.item.id}}</td>
       <td class="text-xs">{{ props.item.expirationDate }}</td>
       <td class="text-xs">{{ props.item.processDate }}</td>
       <td class="justify-center layout px-0">
-        <v-dialog v-if="!docsPurchased.includes(props.item.id)" v-model="dialog" persistent max-width="290">
-          <v-btn slot="activator" icon>
-            <v-icon class="mr-2">
-              mobile_friendly
-            </v-icon>
-          </v-btn>
+        <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id)">
+          <v-icon class="mr-2">
+            mobile_friendly
+          </v-icon>
+        </v-btn>
+        <v-dialog v-model="dialog" persistent max-width="290">
           <v-card>
-            <v-card-title class="headline">Purchase this document?</v-card-title>
+            <v-card-title class="headline">Purchase this document? {{selectedDocId}}</v-card-title>
             <v-card-text>You will pay 5 WLD to the owner of the document.</v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="green darken-1" flat @click="dialog = false">Disagree</v-btn>
-              <v-btn color="green darken-1" flat @click="purchaseDocument('0xB078A8db38Dfb6B298A215a92e96a7eeAfB4fF5b',props.item.id)">Agree</v-btn>
+              <v-btn color="green darken-1" flat @click="purchaseDocument(selectedDocId)">Agree</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-btn icon v-if="docsPurchased.includes(props.item.id)">
-          <v-icon @click="navigateToVal(props.item.id)" color="primary">
+        <v-btn icon v-if="docsPurchased.includes(props.item.id)" @click="navigateToVal(props.item.id)">
+          <v-icon color="primary">
             mobile_friendly
           </v-icon>
         </v-btn>
@@ -48,8 +55,9 @@
 import { mapState } from 'vuex';
 import axios from 'axios';
 import consts from '../../consts.js';
+import firebase from "firebase";
 export default {
-  computed: mapState(['clientData', 'docsPurchased']),
+  computed: mapState(['clientData', 'docsPurchased', 'token']),
   components: {},
   mounted() {
     console.log("Mounted");
@@ -61,6 +69,7 @@ export default {
       gridData: [],
       headers: [
         { text: 'Document type', align: 'left', value: 'docType' },
+        { text: 'Id', align: 'left', value: 'id' },
         { text: 'Expiration Date', value: 'expirationDate' },
         { text: 'Process Date', value: 'processDate' },
         { text: 'Actions', align: 'center', sorteable: false, value: 'name' }
@@ -70,7 +79,8 @@ export default {
       contractAddress: consts.contractAddress,
       snackbarText: 'Texto de prueba',
       snackbarColor: 'error',
-      snackbar: false
+      snackbar: false,
+      selectedDocId: null
     }
   },
   methods: {
@@ -80,22 +90,29 @@ export default {
     },
     navigateToVal: function(id) {
       console.log("Validations Logo clicado");
-      this.$router.push('/document/:' + id + '/validations', () => console.log('Ruta cambiada'));
+      this.$router.push('/document/' + id + '/validations', () => console.log('Ruta cambiada'));
+    },
+    openModal(selectedDocId) {
+      this.dialog = true;
+      this.selectedDocId = selectedDocId;
     },
     getDocuments() {
+      console.log("Token consulta documento");
+      console.log(this.token);
       let config = {
         headers: {
           'securityCode': this.token
-        }
+        },
+        withCredentials: true
       }
-      axios.get('http://localhost:8080/PVIService/resources/users/' + this.clientData.userId + '/documents', config)
+      axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/', config)
         .then((response) => {
           console.log("Consulta Documentos");
           console.log(response.data);
           this.gridData = response.data.documents;
         })
     },
-    purchaseDocument(ownerAdress, documentPurchasedId) {
+    purchaseDocumentTransaction(ownerAdress, documentPurchasedId) {
       var context = this;
       if (window.ethereum) {
         window.web3 = new Web3(ethereum);
@@ -105,7 +122,7 @@ export default {
             var walideanABI = web3.eth.contract(this.abi);
             var walidean = walideanABI.at(this.contractAddress);
             // Eviar 10 WLD a la cuenta 0x43130D4f565fe9D9b06280617b51B634795B9583
-            walidean.transfer(ownerAdress, 1, function(error, result) {
+            walidean.transfer('0x' + ownerAdress, 1, function(error, result) {
               if (!error) {
                 console.log("Transaction hash: " + result);
                 console.log(documentPurchasedId);
@@ -128,6 +145,34 @@ export default {
       } else {
         console.log("MetaMask is not installed");
       }
+    },
+    purchaseDocument(documentPurchasedId) {
+      var context = this;
+      var firestore = firebase.firestore();
+      var providersRef = firestore.collection("providers");
+      let config = {
+        headers: {
+          'securityCode': this.token
+        },
+        withCredentials: true
+      }
+      axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/' + documentPurchasedId, config)
+        .then((response) => {
+          console.log("Documento a comprar");
+          console.log(response.data);
+          providersRef.where("pviId", "==", parseInt(response.data.providerId)).get().then((querySnapshot) => {
+            console.log(querySnapshot);
+            if (querySnapshot.size == 1) {
+              querySnapshot.forEach(function(doc) {
+                // doc.data() is never undefined for query doc snapshots
+                console.log(doc.data());
+                context.purchaseDocumentTransaction(doc.data().ethAddress, documentPurchasedId)
+              });
+            } else {
+              console.log("Proveedor no encontrado");
+            }
+          })
+        })
     }
   }
 }
