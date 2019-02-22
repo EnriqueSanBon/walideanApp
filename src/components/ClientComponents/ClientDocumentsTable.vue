@@ -1,9 +1,9 @@
 <template>
 <div>
-  <v-progress-linear v-if="gridData.length==0" :indeterminate="true"></v-progress-linear>
+  <v-progress-linear v-if="gridData.length==0 && !noDataFlag" :indeterminate="true"></v-progress-linear>
   <v-data-table :headers="headers" :items="gridData" class="elevation-1" color='primary'>
     <template slot="no-data">
-      <v-alert :value="true" color="error" icon="warning">
+      <v-alert :value="noDataFlag" color="error" icon="warning">
         Sorry, nothing to display here :(
       </v-alert>
     </template>
@@ -80,7 +80,8 @@ export default {
       snackbarText: 'Texto de prueba',
       snackbarColor: 'error',
       snackbar: false,
-      selectedDocId: null
+      selectedDocId: null,
+      noDataFlag: false
     }
   },
   methods: {
@@ -108,8 +109,11 @@ export default {
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/', config)
         .then((response) => {
           console.log("Consulta Documentos");
-          console.log(response.data);
+          console.log(response.data.documents);
           this.gridData = response.data.documents;
+          if (response.data.documents.length == 0) {
+            this.noDataFlag = true;
+          }
         })
     },
     purchaseDocumentTransaction(ownerAdress, documentPurchasedId) {

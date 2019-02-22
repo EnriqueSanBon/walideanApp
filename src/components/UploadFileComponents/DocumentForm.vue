@@ -1,6 +1,5 @@
 <template>
 <div>
-  {{docTypeSelected}}
   <v-form>
     <v-container text-xs-center>
       <v-layout align-center justify-space-around row fill-height>
@@ -13,8 +12,8 @@
               </v-flex>
             </v-layout>
           </v-radio-group>
-          <v-layout row wrap>
-            <component :is="docTypeSelected"></component>
+          <v-layout row wrap v-if="docTypeSelected != null">
+            <component :is="docTypeSelected.component"></component>
           </v-layout>
         </v-flex>
       </v-layout>

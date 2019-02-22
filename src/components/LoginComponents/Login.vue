@@ -5,7 +5,7 @@
       <v-layout align-center justify-space-around row fill-height>
         <v-flex xs12 sm8>
           <v-text-field v-model="user" label="Usuario" required></v-text-field>
-          <v-text-field v-model="pass" :counter="20" label="Contraseña" required></v-text-field>
+          <v-text-field v-model="pass" :counter="20" label="Contraseña" required type="password"></v-text-field>
           <v-btn round color="secondary" class="primary--text" dark @click="loginUser()">Login</v-btn>
         </v-flex>
       </v-layout>

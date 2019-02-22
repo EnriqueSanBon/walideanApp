@@ -32,7 +32,7 @@ export default {
     return {
       dni: "53823177J",
       phone: "enriquesanchezbonet@gmail.com",
-      token: 'BCFQFD',
+      token: 'ZXJOkR',
       idUserFound: 17,
       documentTypes: consts.documentTypes,
       documentsSelected: []
