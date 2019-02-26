@@ -20,7 +20,7 @@
         </v-btn>
         <v-dialog v-model="dialog" persistent max-width="290">
           <v-card>
-            <v-card-title class="headline">Purchase this document? {{selectedDocId}}</v-card-title>
+            <v-card-title class="headline">Purchase this document?</v-card-title>
             <v-card-text>You will pay 5 WLD to the owner of the document.</v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -115,6 +115,9 @@ export default {
             this.noDataFlag = true;
           }
         })
+        .catch((response) => {
+          console.log("Error status:" + response.status);
+        })
     },
     purchaseDocumentTransaction(ownerAdress, documentPurchasedId) {
       var context = this;
@@ -126,7 +129,7 @@ export default {
             var walideanABI = web3.eth.contract(this.abi);
             var walidean = walideanABI.at(this.contractAddress);
             // Eviar 10 WLD a la cuenta 0x43130D4f565fe9D9b06280617b51B634795B9583
-            walidean.transfer('0x' + ownerAdress, 1, function(error, result) {
+            walidean.transfer('0x' + ownerAdress, 5, function(error, result) {
               if (!error) {
                 console.log("Transaction hash: " + result);
                 console.log(documentPurchasedId);

@@ -1,6 +1,6 @@
 <template>
 <div>
-  {{$route.params.id}}
+  <v-progress-linear v-if="gridData.length==0 && !noDataFlag" :indeterminate="true"></v-progress-linear>
   <v-data-table :headers="headers" :items="gridData" class="elevation-1">
     <template slot="items" slot-scope="props">
       <td class="font-weight-bold">{{ props.item.description }}</td>
@@ -28,7 +28,8 @@ export default {
         { text: 'Description', align: 'left', value: 'description' },
         { text: 'Validation Date', value: 'timestamp' },
         { text: 'Security Level', value: 'securityLevel' }
-      ]
+      ],
+      noDataFlag: false
     }
   },
   methods: {
@@ -47,6 +48,9 @@ export default {
           console.log(this.token);
           console.log(response.data);
           this.gridData = response.data.validations;
+          if (response.data.documents.length == 0) {
+            this.noDataFlag = true;
+          }
         })
     }
   }

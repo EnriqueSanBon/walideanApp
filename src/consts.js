@@ -1,8 +1,9 @@
 export default {
-  ipPVIService: 'http://10.0.3.58:8080/PVIService/',
+  //ipPVIService: 'http://10.0.3.58:8080/PVIService/',
   //ipPVIService: 'http://demos2.addalia.com/PVIService/',
+  ipPVIService: 'https://www.walidean.com/PVIService/',
   portPVIService: '8080',
-  documentTypes: ['Dni', 'Sanitary', 'Laboral Life', 'Roster', 'License', 'Passport'],
+  documentTypes: ['Dni', 'Sanitary', 'Laboral Life', 'Paysheet', 'License', 'Passport'],
   countries: ['Afganistán', 'Albania', 'Alemania', 'Andorra', 'Angola', 'AntiguayBarbuda', 'ArabiaSaudita', 'Argelia', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaiyán', 'Bahamas', 'Bangladés', 'Barbados', 'Baréin', 'Bélgica',
     'Belice', 'Benín', 'Bielorrusia', 'Birmania', 'Bolivia', 'BosniayHerzegovina', 'Botsuana', 'Brasil', 'Brunéi', 'Bulgaria', 'BurkinaFaso', 'Burundi', 'Bután', 'CaboVerde', 'Camboya', 'Camerún', 'Canadá', 'Catar', 'Chad', 'Chile',
     'China', 'Chipre', 'CiudaddelVaticano', 'Colombia', 'Comoras', 'CoreadelNorte', 'CoreadelSur', 'CostadeMarfil', 'CostaRica', 'Croacia', 'Cuba', 'Dinamarca', 'Dominica', 'Ecuador', 'Egipto', 'ElSalvador', 'EmiratosÁrabesUnidos',

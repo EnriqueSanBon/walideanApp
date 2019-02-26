@@ -6,7 +6,6 @@
       <td class="text-xs">{{ props.item.to }}</td>
       <td class="text-xs">{{ props.item.WLD }}</td>
       <td class="text-xs">{{ props.item.gas }}</td>
-      <td class="text-xs">{{ props.item.doc }}</td>
       <td class="text-xs">{{ props.item.date }}</td>
       <td class="text-xs">
         <a :href="props.item.transactionHash" target="_blank">See transaction</a>
@@ -43,7 +42,6 @@ export default {
         { text: 'To', value: 'to' },
         { text: 'WLD', value: 'WLD' },
         { text: 'Gas', value: 'gas' },
-        { text: 'DocId', value: 'doc' },
         { text: 'Date', value: 'date' },
         { text: 'URL', value: 'transactionHash' }
       ],
@@ -77,6 +75,7 @@ export default {
       }
       axios.get('https://api-ropsten.etherscan.io/api', config)
         .then((response) => {
+          console.log(response.data.result);
           this.gridData = response.data.result.sort(function(a, b) {
             return parseInt(a.timeStamp, 16) - parseInt(b.timeStamp, 16);
           });
@@ -90,16 +89,22 @@ export default {
             formatedObj.from = '0x' + obj.topics[1].slice(26, 30) + '...' + obj.topics[1].slice(-4);
             formatedObj.to = '0x' + obj.topics[2].slice(26, 30) + '...' + obj.topics[2].slice(-4);
             formatedObj.transactionHash = 'https://ropsten.etherscan.io/tx/' + obj.transactionHash;
-            if (obj.topics[3]) {
-              formatedObj.doc = parseInt(obj.topics[3], 16);
-            }
+
             //compose chart arrays
             var formatedDate = formatedObj.date.getDate() + '/' + (formatedObj.date.getMonth() + 1) + '/' + formatedObj.date.getFullYear();
             var indexInDates = dateArray.findIndex(elem => elem.date === formatedDate);
             if (indexInDates >= 0) {
-              if (obj.topics[1] == context.ethAddressFormated) {
+              if ((obj.topics[1].toLowerCase() == context.ethAddressFormated.toLowerCase()) && (obj.topics[2].toLowerCase() != context.ethAddressFormated.toLowerCase())) {
+                console.log("Suma out");
+                console.log(obj.topics[1]);
+                console.log(context.ethAddressFormated);
                 dateArray[indexInDates].out += formatedObj.WLD
-              } else {
+              } else if ((obj.topics[2].toLowerCase() == context.ethAddressFormated.toLowerCase()) && (obj.topics[1].toLowerCase() != context.ethAddressFormated.toLowerCase())) {
+                console.log("Suma In");
+                console.log("topic");
+                console.log(obj.topics[1]);
+                console.log("context address");
+                console.log(context.ethAddressFormated);
                 dateArray[indexInDates].in += formatedObj.WLD
               }
             }

@@ -34,12 +34,12 @@ export default {
       var firestore = firebase.firestore();
       var providersRef = firestore.collection("providers");
       let config = {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+        },
         withCredentials: true
       }
-      axios.post(consts.ipPVIService + 'resources/authenticate', {
-        "user": context.user,
-        "pass": context.pass
-      }, config)
       axios.post(consts.ipPVIService + 'resources/authenticate', {
           "user": this.user,
           "pass": this.pass
