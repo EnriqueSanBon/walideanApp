@@ -142,6 +142,7 @@ export default {
                 console.log(error);
                 context.snackbar = true;
                 context.snackbarText = 'Error, operation not confirmed';
+                context.dialog = false;
               }
             });
           })

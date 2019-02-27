@@ -27,9 +27,9 @@ import consts from '../../consts.js';
 export default {
   data() {
     return {
-      dni: "",
-      phone: "",
-      token: '',
+      dni: "123456789B",
+      phone: "walideanpruebas@gmail.com",
+      token: 'Z6Gxe9',
       idUserFound: null,
       documentTypes: consts.documentTypes,
       documentsSelected: []
