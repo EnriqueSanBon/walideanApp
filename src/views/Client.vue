@@ -3,9 +3,9 @@
   <v-flex xs12 sm4>
     <v-layout column align-center>
       <v-flex xs12>
-        <ProviderBalance />
-        <br>
         <ClientInfo />
+        <br>
+        <ProviderBalance />
         <br>
       </v-flex>
       <v-btn round color="secondary" class="primary--text" @click="$router.push('/uploadFile')" dark>Upload File</v-btn>
