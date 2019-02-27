@@ -2,41 +2,11 @@
 <v-form>
   <v-container text-xs-center>
     <v-layout align-center justify-space-around row fill-height>
-      <v-flex xs12 md6>
-        <v-text-field v-model="firstname" label="First name" required></v-text-field>
-      </v-flex>
-      <v-flex xs12 md6>
-        <v-text-field v-model="surname1" label="Surname 1" required></v-text-field>
-      </v-flex>
-      <v-flex xs12 md6>
-        <v-text-field v-model="surname2" label="Surname 2" required></v-text-field>
-      </v-flex>
-    </v-layout>
-    <v-layout align-center justify-space-around row fill-height>
-      <v-flex xs12 md6>
-        <v-text-field v-model="adress" label="Adress" required></v-text-field>
-      </v-flex>
-      <v-flex xs12 md6>
-        <v-text-field v-model="cp" label="CP" required></v-text-field>
-      </v-flex>
-      <v-flex xs12 md6>
+      <v-flex xs12 md12>
         <v-menu v-model="menu2" :close-on-content-click="false" full-width max-width="290">
-          <v-text-field slot="activator" :value="date" clearable label="Formatted with datefns" readonly></v-text-field>
+          <v-text-field slot="activator" :value="date" clearable label="Expiration date" readonly></v-text-field>
           <v-date-picker v-model="date" @change="menu2 = false"></v-date-picker>
         </v-menu>
-      </v-flex>
-    </v-layout>
-    <v-layout align-center justify-space-around row fill-height>
-      <v-flex xs12 md6>
-        <v-select v-model="nacionality" :items="countries" label="Nacionality"></v-select>
-      </v-flex>
-      <v-flex xs12 md6>
-        <v-select v-model="state" :items="provinces" label="Province"></v-select>
-      </v-flex>
-      <v-flex xs12 md6>
-        <v-radio-group v-model="radioGroup">
-          <v-radio v-for="gender in gender" :key="gender" :label="`Gender ${gender}`" :value="gender" color="primary"></v-radio>
-        </v-radio-group>
       </v-flex>
     </v-layout>
   </v-container>

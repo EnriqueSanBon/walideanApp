@@ -75,8 +75,8 @@ export default {
           "userNumberId": this.numberId,
           "docType": this.docTypeSelected.label,
           "item": "http://prueba",
-          "processDate": "20171108",
-          "expirationDate": "20300205"
+          "processDate": "20190226",
+          "expirationDate": "20190326"
         }, config)
         .then((response) => {
           console.log("Respuesta subida fichero");
