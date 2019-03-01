@@ -14,7 +14,7 @@
       <td class="text-xs">{{ props.item.processDate }}</td>
       <td class="justify-center layout px-0">
         <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id)">
-          <v-icon class="mr-2">
+          <v-icon>
             mobile_friendly
           </v-icon>
         </v-btn>
@@ -98,14 +98,14 @@ export default {
       this.selectedDocId = selectedDocId;
     },
     getDocuments() {
-      console.log("Token consulta documento");
-      console.log(this.token);
       let config = {
         headers: {
           'securityCode': this.token
         },
         withCredentials: true
       }
+      console.log("Get documents");
+      console.log(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/');
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/', config)
         .then((response) => {
           console.log("Consulta Documentos");
@@ -117,6 +117,7 @@ export default {
         })
         .catch((response) => {
           console.log("Error status:" + response.status);
+          this.noDataFlag = true;
         })
     },
     purchaseDocumentTransaction(ownerAdress, documentPurchasedId) {

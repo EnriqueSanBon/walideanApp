@@ -50,7 +50,14 @@ export default {
       dataset0: [],
       dataset1: [],
       chartOptions: {
-        aspectRatio: 0.5
+        aspectRatio: 0.5,
+        scales: {
+          yAxes: {
+            ticks: {
+              beginAtZero: true
+            }
+          }
+        }
       },
       ethAddressFormated: null
     }
@@ -75,7 +82,6 @@ export default {
       }
       axios.get('https://api-ropsten.etherscan.io/api', config)
         .then((response) => {
-          console.log(response.data.result);
           this.gridData = response.data.result.sort(function(a, b) {
             return parseInt(a.timeStamp, 16) - parseInt(b.timeStamp, 16);
           });
@@ -95,16 +101,8 @@ export default {
             var indexInDates = dateArray.findIndex(elem => elem.date === formatedDate);
             if (indexInDates >= 0) {
               if ((obj.topics[1].toLowerCase() == context.ethAddressFormated.toLowerCase()) && (obj.topics[2].toLowerCase() != context.ethAddressFormated.toLowerCase())) {
-                console.log("Suma out");
-                console.log(obj.topics[1]);
-                console.log(context.ethAddressFormated);
                 dateArray[indexInDates].out += formatedObj.WLD
               } else if ((obj.topics[2].toLowerCase() == context.ethAddressFormated.toLowerCase()) && (obj.topics[1].toLowerCase() != context.ethAddressFormated.toLowerCase())) {
-                console.log("Suma In");
-                console.log("topic");
-                console.log(obj.topics[1]);
-                console.log("context address");
-                console.log(context.ethAddressFormated);
                 dateArray[indexInDates].in += formatedObj.WLD
               }
             }

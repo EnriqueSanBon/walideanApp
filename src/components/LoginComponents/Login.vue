@@ -35,7 +35,6 @@ export default {
       var providersRef = firestore.collection("providers");
       let config = {
         headers: {
-          'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
         },
         withCredentials: true

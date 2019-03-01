@@ -33,6 +33,7 @@ export const store = new Vuex.Store({
           .then((response) => {
               console.log("Datos del usuario consultado");
               console.log(response.data);
+              console.log(response.status);
               console.log("Actualizando el Store con el nuevo Usuario");
               context.commit('setClientData', response.data);
               resolve(response);
