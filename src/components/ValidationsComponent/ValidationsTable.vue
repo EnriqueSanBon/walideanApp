@@ -2,6 +2,11 @@
 <div>
   <v-progress-linear v-if="gridData.length==0 && !noDataFlag" :indeterminate="true"></v-progress-linear>
   <v-data-table :headers="headers" :items="gridData" class="elevation-1">
+    <template slot="no-data">
+      <v-alert :value="noDataFlag" color="error" icon="warning">
+        Sorry, nothing to display here :(
+      </v-alert>
+    </template>
     <template slot="items" slot-scope="props">
       <td class="font-weight-bold">{{ props.item.description }}</td>
       <td class="text-xs">{{ props.item.timestamp }}</td>
@@ -48,7 +53,7 @@ export default {
           console.log(this.token);
           console.log(response.data);
           this.gridData = response.data.validations;
-          if (response.data.documents.length == 0) {
+          if (response.data.validations.length == 0) {
             this.noDataFlag = true;
           }
         })
