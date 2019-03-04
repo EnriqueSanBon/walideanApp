@@ -34,17 +34,17 @@ export default {
   data() {
     return {
       valid: true,
-      dni: "123456789B",
+      dni: "53823177J",
       dniRules: [
         v => !!v || 'Name is required',
         v => (v && v.length <= 10) || 'Name must be less than 10 characters'
       ],
-      phone: "walideanpruebas@gmail.com",
+      phone: "enriquesanchezbonet@gmail.com",
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+/.test(v) || 'E-mail must be valid'
       ],
-      token: 'XQOUHC',
+      token: 'y0NOrC',
       idUserFound: null,
       documentTypes: consts.documentTypes,
       documentsSelected: [],

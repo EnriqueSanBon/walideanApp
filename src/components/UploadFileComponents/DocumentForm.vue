@@ -2,7 +2,7 @@
 <div>
   <v-form>
     <v-container text-xs-center>
-      <v-layout align-center justify-space-around row fill-height>
+      <v-layout align-left justify-space-around column fill-height>
         <v-flex xs12 sm8>
           <v-text-field v-model="numberId" label="Number ID" required></v-text-field>
           <v-radio-group v-model="docTypeSelected">
@@ -12,14 +12,18 @@
               </v-flex>
             </v-layout>
           </v-radio-group>
-          <v-layout row wrap v-if="docTypeSelected != null">
-            <component :is="docTypeSelected.component"></component>
-          </v-layout>
+        </v-flex>
+        <v-flex xs12 sm8>
+          <v-menu v-model="menu2" :close-on-content-click="false" full-width max-width="290">
+            <v-text-field slot="activator" :value="date" clearable label="Expiration date" readonly></v-text-field>
+            <v-date-picker v-model="date" @change="menu2 = false"></v-date-picker>
+          </v-menu>
         </v-flex>
       </v-layout>
       <v-btn round color="secondary" class="primary--text" small dark @click="uploadDocument()">Submit Document</v-btn>
     </v-container>
   </v-form>
+  {{today}}
 </div>
 </template>
 
@@ -27,19 +31,22 @@
 import { mapState } from 'vuex';
 import axios from 'axios';
 import consts from '../../consts.js';
-import DNIForm from '../../components/DocumentForms/DNIForm';
-import LaboralLifeForm from '../../components/DocumentForms/LaboralLifeForm';
-import LisenceForm from '../../components/DocumentForms/LisenceForm';
-import PassportForm from '../../components/DocumentForms/PassportForm';
-import RosterForm from '../../components/DocumentForms/RosterForm';
-import SanitaryForm from '../../components/DocumentForms/SanitaryForm';
 
 export default {
-  components: { DNIForm, LaboralLifeForm, LisenceForm, PassportForm, RosterForm, SanitaryForm },
-  computed: mapState(['clientData', 'token']),
+  computed: {
+    ...mapState(['clientData', 'token']),
+    formatedDate: function() {
+      var patron = /-/g;
+      var newValue = "";
+      return this.date.replace(patron, newValue);
+    }
+  },
   data() {
     return {
+      date: new Date().toISOString().substr(0, 10),
+      today: new Date().toISOString().substr(0, 10).replace(/-/g, ""),
       numberId: null,
+      menu2: false,
       documentTypes: [{
         label: 'Dni',
         component: 'DNIForm'
@@ -70,13 +77,15 @@ export default {
         },
         withCredentials: true
       }
+      console.log(this.today);
+      console.log(this.formatedDate);
       axios.post(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents', {
           "userId": this.clientData.userId,
           "userNumberId": this.numberId,
           "docType": this.docTypeSelected.label,
           "item": "http://prueba",
-          "processDate": "20190226",
-          "expirationDate": "20190326"
+          "processDate": this.today,
+          "expirationDate": this.formatedDate
         }, config)
         .then((response) => {
           console.log("Respuesta subida fichero");

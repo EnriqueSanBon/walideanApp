@@ -57,7 +57,7 @@ import axios from 'axios';
 import consts from '../../consts.js';
 import firebase from "firebase";
 export default {
-  computed: mapState(['clientData', 'docsPurchased', 'token']),
+  computed: mapState(['clientData', 'docsPurchased', 'token', 'ethAddress']),
   components: {},
   mounted() {
     console.log("Mounted");
@@ -175,7 +175,11 @@ export default {
               querySnapshot.forEach(function(doc) {
                 // doc.data() is never undefined for query doc snapshots
                 console.log(doc.data());
-                context.purchaseDocumentTransaction(doc.data().ethAddress, documentPurchasedId)
+                if (context.ethAddress.toLowerCase() == doc.data().ethAddress.toLowerCase()) {
+                  context.navigateToVal(documentPurchasedId);
+                } else {
+                  context.purchaseDocumentTransaction(doc.data().ethAddress, documentPurchasedId)
+                }
               });
             } else {
               console.log("Proveedor no encontrado");
