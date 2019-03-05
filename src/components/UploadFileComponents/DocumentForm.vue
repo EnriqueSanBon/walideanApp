@@ -71,27 +71,15 @@ export default {
   },
   methods: {
     uploadDocument() {
-      let config = {
-        headers: {
-          'securityCode': this.token,
-        },
-        withCredentials: true
+      var documentData = {
+        "userId": this.clientData.userId,
+        "userNumberId": this.numberId,
+        "docType": this.docTypeSelected.label,
+        "item": "http://prueba",
+        "processDate": this.today,
+        "expirationDate": this.formatedDate
       }
-      console.log(this.today);
-      console.log(this.formatedDate);
-      axios.post(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents', {
-          "userId": this.clientData.userId,
-          "userNumberId": this.numberId,
-          "docType": this.docTypeSelected.label,
-          "item": "http://prueba",
-          "processDate": this.today,
-          "expirationDate": this.formatedDate
-        }, config)
-        .then((response) => {
-          console.log("Respuesta subida fichero");
-          console.log(response.data);
-          this.$router.push('/UploadFile/' + response.data.documentId + '/validateDocument')
-        })
+      this.$router.push({ name: 'validateDocument', params: { documentData: documentData } })
     }
   }
 }

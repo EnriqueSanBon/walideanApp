@@ -28,6 +28,7 @@
       <v-btn v-if="loaded == 0" round color="secondary" class="primary--text" small dark @click="uploadValidations()">Submit Validation</v-btn>
     </v-container>
   </v-form>
+  {{documentData}}
 </div>
 </template>
 
@@ -38,6 +39,7 @@ import consts from '../../consts.js';
 import DNIValidations from '../../DocValidations/DNI.js';
 
 export default {
+  props: ["documentData"],
   data() {
     return {
       DNIValidations: DNIValidations.validations,
@@ -70,18 +72,31 @@ export default {
       this.loaded = 0.1;
       this.radius = 300;
       var context = this;
+      var documentId = null;
       let config = {
         headers: {
           'securityCode': this.token,
         },
         withCredentials: true
       }
+      await axios.post(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents', {
+        "userId": this.documentData.userId,
+        "userNumberId": this.documentData.userNumberId,
+        "docType": this.documentData.docType,
+        "item": this.documentData.item,
+        "processDate": this.documentData.processDate,
+        "expirationDate": this.documentData.expirationDate,
+      }, config).then((response) => {
+        console.log("Respuesta subida fichero");
+        console.log(response.data);
+        documentId = response.data.documentId;
+      })
       var element;
       for (element in this.selected) {
         console.log(element);
-        await axios.post(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + context.$route.params.id + '/validations', {
+        await axios.post(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + documentId + '/validations', {
             "description": this.selected[element],
-            "timestamp": "20171231",
+            "timestamp": new Date().toISOString().substr(0, 10).replace(/-/g, ""),
             "securityLevel": "ALTO"
           }, config)
           .then((response) => {

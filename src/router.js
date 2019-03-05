@@ -36,8 +36,10 @@ export default new Router({
       path: '/document/:id/validations',
       component: Validations
     }, {
-      path: '/UploadFile/:id/validateDocument',
-      component: ValidateDocument
+      path: '/UploadFile/validateDocument',
+      component: ValidateDocument,
+      name: 'validateDocument',
+      props: true
     }, {
       path: '/Statics/',
       component: Statics

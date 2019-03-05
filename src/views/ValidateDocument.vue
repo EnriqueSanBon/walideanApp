@@ -1,7 +1,7 @@
 <template>
 <v-layout align-center justify-space-around row fill-height wrap>
   <v-flex xs12 md8>
-    <ValidateDocumentForm />
+    <ValidateDocumentForm :documentData="documentData" />
   </v-flex>
 </v-layout>
 </template>
@@ -12,6 +12,7 @@ import ValidateDocumentForm from '../components/ValidateDocumentComponents/Valid
 export default {
   components: {
     ValidateDocumentForm
-  }
+  },
+  props: ["documentData"]
 }
 </script>

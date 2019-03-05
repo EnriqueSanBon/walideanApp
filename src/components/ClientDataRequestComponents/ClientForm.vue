@@ -44,7 +44,7 @@ export default {
         v => !!v || 'E-mail is required',
         v => /.+@.+/.test(v) || 'E-mail must be valid'
       ],
-      token: 'y0NOrC',
+      token: 'AcV2f2',
       idUserFound: null,
       documentTypes: consts.documentTypes,
       documentsSelected: [],

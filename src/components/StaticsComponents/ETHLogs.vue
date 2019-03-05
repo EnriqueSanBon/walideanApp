@@ -66,7 +66,11 @@ export default {
     getStatics() {
       this.ethAddressFormated = '0x000000000000000000000000' + this.ethAddress;
       console.log(this.ethAddressFormated);
-      var dateArray = this.getDateArray(Date.now() - 2629750000, Date.now());
+      var date30DaysAgo = new Date();
+      date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
+      var dateArray = this.getDateArray(date30DaysAgo, Date.now());
+      console.log("fechas");
+      console.log(dateArray);
       var context = this;
       let config = {
         params: {
@@ -131,6 +135,7 @@ export default {
       var arr = []
       var dt = new Date(start);
       while (dt <= end) {
+        console.log(dt + '-' + end);
         var element = {
           date: null,
           out: 0,
