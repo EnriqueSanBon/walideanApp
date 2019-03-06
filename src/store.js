@@ -19,9 +19,6 @@ export const store = new Vuex.Store({
   },
   actions: {
     setClientDataAsync: (context, data) => {
-      console.log("token y idUserFound en store");
-      console.log(data.idUserFound);
-      console.log(data.token);
       let config = {
         headers: {
           'securityCode': data.token
@@ -31,15 +28,13 @@ export const store = new Vuex.Store({
       return new Promise((resolve, reject) => {
         axios.get(consts.ipPVIService + 'resources/users/' + data.idUserFound, config)
           .then((response) => {
-              console.log("Datos del usuario consultado");
-              console.log(response.data);
-              console.log(response.status);
-              console.log("Actualizando el Store con el nuevo Usuario");
+              if (response.data.userId == "") {
+                return reject("Invalid token");
+              }
               context.commit('setClientData', response.data);
-              resolve(response);
+              return resolve(response);
             },
             error => {
-              // http failed, let the calling function know that action did not work out
               reject(error);
             })
       })
@@ -54,5 +49,4 @@ export const store = new Vuex.Store({
       context.commit('setEthAddress', ethAddress);
     }
   },
-
 });

@@ -11,14 +11,14 @@
               <v-switch v-model="documentsSelected" :label="button" :value="button" color="primary"></v-switch>
             </v-flex>
           </v-layout>
-          <v-btn round color="secondary" class="primary--text" dark @click="searchClient(true)">Send Token</v-btn>
+          <v-btn round color="secondary" class="primary--text" dark @click="searchClient(true).catch((err) => {snackbar = true; snackbarText = err.message;})">Send Token</v-btn>
           <v-text-field v-model="token" label="Received Token" required></v-text-field>
           <v-btn round color="secondary" class="primary--text" dark @click="getClient()">Check User</v-btn>
         </v-flex>
       </v-layout>
     </v-container>
   </v-form>
-  <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="6000">
+  <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="15000">
     {{ snackbarText }}
     <v-btn dark flat @click="snackbar = false">
       Close
@@ -44,7 +44,7 @@ export default {
         v => !!v || 'E-mail is required',
         v => /.+@.+/.test(v) || 'E-mail must be valid'
       ],
-      token: 'AcV2f2',
+      token: 'SuQSOI',
       idUserFound: null,
       documentTypes: consts.documentTypes,
       documentsSelected: [],
@@ -55,14 +55,8 @@ export default {
   },
   methods: {
     searchClient(withToken) {
-
-      if ((this.documentsSelected.length == 0 || this.$refs.form.validate() == false) && withToken) {
-        this.snackbar = true;
-        this.snackbarText = 'Error, enter correct client data';
-        return;
-      }
-      console.log("Search Client");
       var context = this;
+      var abort = false;
       let config = {
         headers: {
           'maxRecords': 100,
@@ -72,58 +66,99 @@ export default {
         },
         withCredentials: true
       }
+      if ((this.documentsSelected.length == 0 || this.$refs.form.validate() == false) && withToken) {
+        abort = true;
+      }
       const promise = new Promise(function(resolve, reject) {
+        if (abort) {
+          return reject(new Error('Error, enter correct client data'));
+        }
         axios.get(consts.ipPVIService + 'resources/users', config)
           .then((response) => {
-            console.log("Respuesta busqueda usuario");
-            console.log(response.data);
             if (response.data.usersCount == '1') {
               context.idUserFound = response.data.idList[0];
               if (withToken)
                 context.sendToken();
-              resolve(response.data.idList[0])
+              return resolve(response.data.idList[0])
             } else {
-              reject(new Error('Usuario invalido'))
+              return reject(new Error('Combinatios numberId and phone not found'))
+            }
+          })
+          .catch((error) => {
+            if (error.message === "Network Error") {
+              context.snackbarColor = 'error';
+              context.snackbar = true;
+              context.snackbarText = 'Network Error';
+            } else {
+              context.snackbar = true;
+              switch (error.response.status) {
+                case 401:
+                  context.snackbarText = 'Must be logged';
+                  break;
+                default:
+                  context.snackbarText = error.response.statusText;
+              }
             }
           })
       })
       return promise
     },
     sendToken() {
-      axios.post(consts.ipPVIService + 'resources/users/' + this.idUserFound + '/token', {
-          'docTypes': this.documentsSelected
-        }, { withCredentials: true })
-        .then((response) => {})
+      var context = this;
+      let config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true
+      }
+      axios.put(consts.ipPVIService + 'resources/users/' + this.idUserFound + '/token/', {
+          "docTypes": this.documentsSelected
+        }, config)
+        .then(() => {
+          context.snackbarColor = 'success';
+          context.snackbarText = 'Token sent';
+          context.snackbar = true;
+        })
     },
     getClient() {
-      console.log("Entra en getClient");
-      console.log(this.idUserFound);
       var context = this;
       if (!this.idUserFound) {
-        console.log("Entra en no hay user found");
         this.searchClient(false)
           .then(() => {
             var data = {
               'token': context.token,
               'idUserFound': context.idUserFound
             }
-            console.log("Despues de searchcliente el iduserfound vale: " + context.idUserFound);
-            context.$store.dispatch('setClientDataAsync', data).then(() => {
-              context.$store.dispatch('setTokenAsync', context.token).then(() => {
-                context.$router.push('/client', () => console.log('Ruta cambiada')); // Home
+            context.$store.dispatch('setClientDataAsync', data)
+              .then(() => {
+                context.$store.dispatch('setTokenAsync', context.token).then(() => {
+                  context.$router.push('/client');
+                })
+              }).catch((err) => {
+                context.snackbarColor = 'error';
+                context.snackbarText = err;
+                context.snackbar = true;
               })
-            })
+          }).catch((err) => {
+            context.snackbar = true;
+            context.snackbarText = err.message;
           })
       } else {
         var data = {
           'token': this.token,
           'idUserFound': this.idUserFound
         }
-        this.$store.dispatch('setClientDataAsync', data).then(() => {
-          this.$store.dispatch('setTokenAsync', this.token).then(() => {
-            this.$router.push('/client', () => console.log('Ruta cambiada')); // Home
+        this.$store.dispatch('setClientDataAsync', data)
+          .then((response) => {
+            this.$store.dispatch('setTokenAsync', this.token)
+              .then(() => {
+                this.$router.push('/client'); // Home
+              })
+          }).catch((err) => {
+            context.snackbarColor = 'error';
+            context.snackbarText = err;
+            context.snackbar = true;
           })
-        })
       }
     }
   }

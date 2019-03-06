@@ -1,6 +1,12 @@
 <template>
 <div>
+  <v-progress-linear v-if="gridData.length==0 && !noDataFlag" :indeterminate="true"></v-progress-linear>
   <v-data-table :headers="headers" :items="gridData" class="elevation-1" color='primary'>
+    <template slot="no-data">
+      <v-alert :value="noDataFlag" color="error" icon="warning">
+        {{emptyTableText}}
+      </v-alert>
+    </template>
     <template slot="items" slot-scope="props">
       <td class="text-xs">{{ props.item.from }}</td>
       <td class="text-xs">{{ props.item.to }}</td>
@@ -32,7 +38,11 @@ export default {
     LineChart
   },
   mounted() {
-    this.getStatics();
+
+    this.getStatics().catch((e) => {
+      this.noDataFlag = true;
+      this.emptyTableText = e
+    })
   },
   data() {
     return {
@@ -46,6 +56,8 @@ export default {
         { text: 'URL', value: 'transactionHash' }
       ],
       datacollection: null,
+      noDataFlag: false,
+      emptyTableText: 'Sorry, nothing to display here :(',
       labels: [],
       dataset0: [],
       dataset1: [],
@@ -65,12 +77,9 @@ export default {
   methods: {
     getStatics() {
       this.ethAddressFormated = '0x000000000000000000000000' + this.ethAddress;
-      console.log(this.ethAddressFormated);
       var date30DaysAgo = new Date();
       date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
       var dateArray = this.getDateArray(date30DaysAgo, Date.now());
-      console.log("fechas");
-      console.log(dateArray);
       var context = this;
       let config = {
         params: {
@@ -84,58 +93,71 @@ export default {
           'topic1_2_opr': 'or' //type
         }
       }
-      axios.get('https://api-ropsten.etherscan.io/api', config)
-        .then((response) => {
-          this.gridData = response.data.result.sort(function(a, b) {
-            return parseInt(a.timeStamp, 16) - parseInt(b.timeStamp, 16);
-          });
-          this.gridData = this.gridData.map((obj) => {
-            //Format response
-            var formatedObj = {};
-            formatedObj.date = new Date(0);
-            formatedObj.date.setUTCSeconds(parseInt(obj.timeStamp, 16));
-            formatedObj.gas = parseInt(obj.gasUsed, 16) / Math.pow(10, 9);
-            formatedObj.WLD = parseInt(obj.data, 16);
-            formatedObj.from = '0x' + obj.topics[1].slice(26, 30) + '...' + obj.topics[1].slice(-4);
-            formatedObj.to = '0x' + obj.topics[2].slice(26, 30) + '...' + obj.topics[2].slice(-4);
-            formatedObj.transactionHash = 'https://ropsten.etherscan.io/tx/' + obj.transactionHash;
-
-            //compose chart arrays
-            var formatedDate = formatedObj.date.getDate() + '/' + (formatedObj.date.getMonth() + 1) + '/' + formatedObj.date.getFullYear();
-            var indexInDates = dateArray.findIndex(elem => elem.date === formatedDate);
-            if (indexInDates >= 0) {
-              if ((obj.topics[1].toLowerCase() == context.ethAddressFormated.toLowerCase()) && (obj.topics[2].toLowerCase() != context.ethAddressFormated.toLowerCase())) {
-                dateArray[indexInDates].out += formatedObj.WLD
-              } else if ((obj.topics[2].toLowerCase() == context.ethAddressFormated.toLowerCase()) && (obj.topics[1].toLowerCase() != context.ethAddressFormated.toLowerCase())) {
-                dateArray[indexInDates].in += formatedObj.WLD
-              }
+      return new Promise((resolve, reject) => {
+        axios.get('https://api-ropsten.etherscan.io/api', config)
+          .then((response) => {
+            if (response.data.status != 1) {
+              return reject("No statics data found");
             }
-            return formatedObj
+            this.gridData = response.data.result.sort(function(a, b) {
+              return parseInt(a.timeStamp, 16) - parseInt(b.timeStamp, 16);
+            });
+            this.gridData = this.gridData.map((obj) => {
+              //Format response
+              var formatedObj = {};
+              formatedObj.date = new Date(0);
+              formatedObj.date.setUTCSeconds(parseInt(obj.timeStamp, 16));
+              formatedObj.gas = parseInt(obj.gasUsed, 16) / Math.pow(10, 9);
+              formatedObj.WLD = parseInt(obj.data, 16);
+              formatedObj.from = '0x' + obj.topics[1].slice(26, 30) + '...' + obj.topics[1].slice(-4);
+              formatedObj.to = '0x' + obj.topics[2].slice(26, 30) + '...' + obj.topics[2].slice(-4);
+              formatedObj.transactionHash = 'https://ropsten.etherscan.io/tx/' + obj.transactionHash;
+
+              //compose chart arrays
+              var formatedDate = formatedObj.date.getDate() + '/' + (formatedObj.date.getMonth() + 1) + '/' + formatedObj.date.getFullYear();
+              var indexInDates = dateArray.findIndex(elem => elem.date === formatedDate);
+              if (indexInDates >= 0) {
+                if ((obj.topics[1].toLowerCase() == context.ethAddressFormated.toLowerCase()) && (obj.topics[2].toLowerCase() != context.ethAddressFormated.toLowerCase())) {
+                  dateArray[indexInDates].out += formatedObj.WLD
+                } else if ((obj.topics[2].toLowerCase() == context.ethAddressFormated.toLowerCase()) && (obj.topics[1].toLowerCase() != context.ethAddressFormated.toLowerCase())) {
+                  dateArray[indexInDates].in += formatedObj.WLD
+                }
+              }
+              return formatedObj
+            })
+            dateArray.map((obj) => {
+              this.labels.push(obj.date)
+              this.dataset0.push(obj.out)
+              this.dataset1.push(obj.in)
+            })
+            this.datacollection = {
+              labels: this.labels,
+              datasets: [{
+                label: 'Purchases',
+                backgroundColor: '#51B189',
+                data: this.dataset0
+              }, {
+                label: 'Sales',
+                backgroundColor: '#FADF70',
+                data: this.dataset1
+              }]
+            }
+          }).catch((response) => {
+            if (response.message === "Network Error") {
+              context.snackbar = true;
+              context.snackbarText = 'Network Error';
+            } else {
+              context.snackbar = true;
+              context.snackbarText = 'Error: ' + response.status;
+            }
           })
-          dateArray.map((obj) => {
-            this.labels.push(obj.date)
-            this.dataset0.push(obj.out)
-            this.dataset1.push(obj.in)
-          })
-          this.datacollection = {
-            labels: this.labels,
-            datasets: [{
-              label: 'Purchases',
-              backgroundColor: '#51B189',
-              data: this.dataset0
-            }, {
-              label: 'Sales',
-              backgroundColor: '#FADF70',
-              data: this.dataset1
-            }]
-          }
-        })
+      })
+
     },
     getDateArray(start, end) {
       var arr = []
       var dt = new Date(start);
       while (dt <= end) {
-        console.log(dt + '-' + end);
         var element = {
           date: null,
           out: 0,

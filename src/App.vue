@@ -15,7 +15,7 @@
     <v-btn icon @click="goDark=!goDark">
       <v-icon color="secondary">brightness_medium</v-icon>
     </v-btn>
-    <v-btn icon @click="$router.push('/')">
+    <v-btn icon @click="logOut()">
       <v-icon color="secondary">close</v-icon>
     </v-btn>
   </v-toolbar>
@@ -26,17 +26,35 @@
   </v-content>
   <v-footer app>
   </v-footer>
-
 </v-app>
 </template>
 
 <script>
+import axios from 'axios';
+import consts from './consts.js';
 export default {
   name: 'App',
   components: {},
+  mounted() {
+    this.$router.onReady(() => { this.$router.push('/') }, () => { this.$router.push('/') })
+  },
   data() {
     return {
       goDark: false
+    }
+  },
+  methods: {
+    logOut() {
+      var context = this;
+      let config = {
+        withCredentials: true
+      }
+      axios.delete(consts.ipPVIService + 'resources/authenticate/', config)
+        .then(() => {
+          this.$router.push('/'); // Home
+        }).catch(() => {
+          this.$router.push('/'); // Home
+        })
     }
   }
 }

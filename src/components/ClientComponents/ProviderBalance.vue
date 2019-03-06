@@ -1,38 +1,46 @@
 <template>
-<v-card>
-  <v-card-title>
-    <h4>Account Balance</h4>
-  </v-card-title>
-  <v-divider></v-divider>
-  <v-list dense>
-    <v-list-tile>
-      <v-list-tile-content class="font-weight-bold">Your gas balance is: </v-list-tile-content>
-      <v-list-tile-content class="align-end">{{animatedETH}} ETH</v-list-tile-content>
-    </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-content class="font-weight-bold">Your coin balance is: </v-list-tile-content>
-      <v-list-tile-content class="align-end">{{animatedWLD}} WLD</v-list-tile-content>
-    </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-content class="font-weight-bold">Metamask: </v-list-tile-content>
-      <template v-if="metamaskState">
-        <v-list-tile-content class="align-end">Installed and available</v-list-tile-content>
-        <v-icon>done</v-icon>
-      </template>
-      <template v-if="!metamaskState">
-        <v-list-tile-content class="align-end">not installed or disabled</v-list-tile-content>
-        <v-icon>warning</v-icon>
-      </template>
-    </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-content class="font-weight-bold">Global amount of WLD</v-list-tile-content>
-      <v-list-tile-content class="align-end">{{animatedCirculationWLD}}</v-list-tile-content>
-    </v-list-tile>
-  </v-list>
-  <v-card-actions>
-    <v-btn flat color="secondary" @click="$router.push('/Statics');">Blockchain movements</v-btn>
-  </v-card-actions>
-</v-card>
+<div>
+  <v-card>
+    <v-card-title>
+      <h4>Account Balance</h4>
+    </v-card-title>
+    <v-divider></v-divider>
+    <v-list dense>
+      <v-list-tile>
+        <v-list-tile-content class="font-weight-bold">Your gas balance is: </v-list-tile-content>
+        <v-list-tile-content class="align-end">{{animatedETH}} ETH</v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-content class="font-weight-bold">Your coin balance is: </v-list-tile-content>
+        <v-list-tile-content class="align-end">{{animatedWLD}} WLD</v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-content class="font-weight-bold">Metamask: </v-list-tile-content>
+        <template v-if="metamaskState">
+          <v-list-tile-content class="align-end">Installed and available</v-list-tile-content>
+          <v-icon>done</v-icon>
+        </template>
+        <template v-if="!metamaskState">
+          <v-list-tile-content class="align-end">not installed or disabled</v-list-tile-content>
+          <v-icon>warning</v-icon>
+        </template>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-content class="font-weight-bold">Global amount of WLD</v-list-tile-content>
+        <v-list-tile-content class="align-end">{{animatedCirculationWLD}}</v-list-tile-content>
+      </v-list-tile>
+    </v-list>
+    <v-card-actions>
+      <v-btn flat color="secondary" @click="$router.push('/Statics');">Blockchain movements</v-btn>
+    </v-card-actions>
+  </v-card>
+  <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="15000">
+    {{ snackbarText }}
+    <v-btn dark flat @click="snackbar = false">
+      Close
+    </v-btn>
+  </v-snackbar>
+</div>
 </template>
 
 <script>
@@ -42,13 +50,14 @@ import consts from '../../consts.js';
 export default {
   components: {},
   mounted() {
-    console.log("Mounted");
     this.getETHBalance();
     this.getWLDBalance();
     if (window.ethereum) {
       this.metamaskState = true
     } else {
-      console.log("MetaMask is not installed or not enabled");
+      context.snackbarColor = 'error';
+      context.snackbarText = 'MetaMask is not installed or not enabled';
+      context.snackbar = true;
     }
     this.getTotalWalies();
   },
@@ -62,7 +71,10 @@ export default {
       tweenedCirculationWLD: 0,
       metamaskState: false,
       abi: consts.abi,
-      contractAddress: consts.contractAddress
+      contractAddress: consts.contractAddress,
+      snackbar: false,
+      snackbarText: 'Error',
+      snackbarColor: 'error'
     }
   },
   computed: {
@@ -103,8 +115,6 @@ export default {
           'address': '0x09C564205bbfdfDA1dd6F7F905BE7E44d55FFed9'
         }
       }).then((response) => {
-        console.log("Saldo de ETH");
-        console.log(response);
         context.ethBalance = response.data.result / Math.pow(10, 18);
       })
     },
@@ -118,8 +128,6 @@ export default {
           'contractaddress': this.contractAddress
         }
       }).then((response) => {
-        console.log("Saldo de WLD");
-        console.log(response);
         context.wldBalance = response.data.result;
       })
     },
@@ -127,15 +135,16 @@ export default {
       var context = this;
       window.web3 = new Web3(ethereum);
       ethereum.enable().then(() => {
-        console.log("Acceso a metamask Correcto");
         var walideanABI = web3.eth.contract(this.abi);
         var walidean = walideanABI.at(this.contractAddress);
         walidean.totalSupply(function(error, result) {
           if (!error) {
-            console.log("Respues metamask total monedas");
-            console.log(result);
             context.circulationWLD = result.c[0];
-          } else console.log(error);
+          } else {
+            context.snackbarColor = 'error';
+            context.snackbarText = error;
+            context.snackbar = true;
+          }
         })
       })
     },

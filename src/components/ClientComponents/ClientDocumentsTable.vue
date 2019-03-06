@@ -4,7 +4,7 @@
   <v-data-table :headers="headers" :items="gridData" class="elevation-1" color='primary'>
     <template slot="no-data">
       <v-alert :value="noDataFlag" color="error" icon="warning">
-        Sorry, nothing to display here :(
+        {{emptyTableText}}
       </v-alert>
     </template>
     <template slot="items" slot-scope="props">
@@ -60,13 +60,16 @@ export default {
   computed: mapState(['clientData', 'docsPurchased', 'token', 'ethAddress']),
   components: {},
   mounted() {
-    console.log("Mounted");
+    if (!this.clientData) {
+      this.$router.push('/ClientDataRequest');
+    }
     this.getDocuments();
   },
   data() {
     return {
       searchQuery: '',
       gridData: [],
+      emptyTableText: 'Sorry, nothing to display here :(',
       headers: [
         { text: 'Document type', align: 'left', value: 'docType' },
         { text: 'Id', align: 'left', value: 'id' },
@@ -77,7 +80,7 @@ export default {
       dialog: false,
       abi: consts.abi,
       contractAddress: consts.contractAddress,
-      snackbarText: 'Texto de prueba',
+      snackbarText: 'Error',
       snackbarColor: 'error',
       snackbar: false,
       selectedDocId: null,
@@ -86,12 +89,10 @@ export default {
   },
   methods: {
     navigateToDoc: function(id) {
-      console.log("navigateToDoc con id " + id);
-      this.$router.push('/document/:' + id, () => console.log('Ruta cambiada'));
+      this.$router.push('/document/:' + id);
     },
     navigateToVal: function(id) {
-      console.log("Validations Logo clicado");
-      this.$router.push('/document/' + id + '/validations', () => console.log('Ruta cambiada'));
+      this.$router.push('/document/' + id + '/validations');
     },
     openModal(selectedDocId) {
       this.dialog = true;
@@ -104,20 +105,22 @@ export default {
         },
         withCredentials: true
       }
-      console.log("Get documents");
-      console.log(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/');
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/', config)
         .then((response) => {
-          console.log("Consulta Documentos");
-          console.log(response.data.documents);
           this.gridData = response.data.documents;
           if (response.data.documents.length == 0) {
             this.noDataFlag = true;
+            this.emptyTableText = "No documents for this user"
           }
         })
         .catch((response) => {
-          console.log("Error status:" + response.status);
-          this.noDataFlag = true;
+          if (response.message === "Network Error") {
+            this.noDataFlag = true;
+            this.emptyTableText = "Network Error: please check connection"
+          } else {
+            this.noDataFlag = true;
+            this.emptyTableText = "No documents for this user"
+          }
         })
     },
     purchaseDocumentTransaction(ownerAdress, documentPurchasedId) {
@@ -132,27 +135,28 @@ export default {
             // Eviar 10 WLD a la cuenta 0x43130D4f565fe9D9b06280617b51B634795B9583
             walidean.transfer('0x' + ownerAdress, 5, function(error, result) {
               if (!error) {
-                console.log("Transaction hash: " + result);
-                console.log(documentPurchasedId);
                 context.$store.dispatch('addDocAsync', documentPurchasedId).then(() => {
                   //pasar al siguiente modulo
-                  console.log("Cambiando de ruta");
                   context.navigateToVal(documentPurchasedId);
                 })
               } else {
-                console.log(error);
                 context.snackbar = true;
-                context.snackbarText = 'Error, operation not confirmed';
+                context.snackbarText = 'Error: operation not confirmed';
                 context.dialog = false;
               }
             });
           })
           // Si ocurre algún problema dentro del try (autorización / acceso MetaMask principalmente)
         } catch (error) {
-          console.log(error);
+          context.snackbar = true;
+          context.color = 'error';
+          context.snackbarText = error;
+          context.dialog = false;
         } // En caso de que falle el primer if, es que MetaMask no está installado
       } else {
-        console.log("MetaMask is not installed");
+        context.snackbar = true;
+        context.color = 'error';
+        context.snackbarText = 'MetaMask is not installed';
       }
     },
     purchaseDocument(documentPurchasedId) {
@@ -167,14 +171,10 @@ export default {
       }
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/' + documentPurchasedId, config)
         .then((response) => {
-          console.log("Documento a comprar");
-          console.log(response.data);
           providersRef.where("pviId", "==", parseInt(response.data.providerId)).get().then((querySnapshot) => {
-            console.log(querySnapshot);
             if (querySnapshot.size == 1) {
               querySnapshot.forEach(function(doc) {
                 // doc.data() is never undefined for query doc snapshots
-                console.log(doc.data());
                 if (context.ethAddress.toLowerCase() == doc.data().ethAddress.toLowerCase()) {
                   context.navigateToVal(documentPurchasedId);
                 } else {
@@ -182,9 +182,19 @@ export default {
                 }
               });
             } else {
-              console.log("Proveedor no encontrado");
+              throw "Provider not found";
             }
           })
+        }).catch((response) => {
+          if (response.message === "Network Error") {
+            context.snackbar = true;
+            context.snackbarText = 'Network Error';
+            context.dialog = false;
+          } else {
+            context.snackbar = true;
+            context.snackbarText = 'Error: ' + response.status;
+            context.dialog = false;
+          }
         })
     }
   }

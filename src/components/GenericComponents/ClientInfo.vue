@@ -22,14 +22,7 @@ export default {
   data() {
     return {
       searchQuery: '',
-      gridColumns: ['Tipo', 'Numero', 'Documento', 'Validacion'],
-      gridData: [
-        /*
-                { Tipo: 'Nomina', Numero: 12355568 },
-                { Tipo: 'DNI', Numero: '523698978A' },
-                { Tipo: 'Nomina', Numero: 25558745 },
-                { Tipo: 'Carnet', Numero: 5888878 }*/
-      ]
+      gridColumns: ['Tipo', 'Numero', 'Documento', 'Validacion']
     }
   },
   methods: {}
