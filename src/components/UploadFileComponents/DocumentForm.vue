@@ -1,10 +1,10 @@
 <template>
 <div>
-  <v-form>
+  <v-form ref="form">
     <v-container text-xs-center>
       <v-layout align-left justify-space-around column fill-height>
         <v-flex xs12 sm8>
-          <v-text-field v-model="numberId" label="Number ID" required></v-text-field>
+          <v-text-field v-model="numberId" :rules="numberIdRules" label="Number ID" required></v-text-field>
           <v-radio-group v-model="docTypeSelected">
             <v-layout row wrap>
               <v-flex v-for="button in documentTypes" xs4>
@@ -15,7 +15,7 @@
         </v-flex>
         <v-flex xs12 sm8>
           <v-menu v-model="menu2" :close-on-content-click="false" full-width max-width="290">
-            <v-text-field slot="activator" :value="date" clearable label="Expiration date" readonly></v-text-field>
+            <v-text-field slot="activator" :value="date" clearable label="Expiration date" readonly :rules="dateRules"></v-text-field>
             <v-date-picker v-model="date" @change="menu2 = false"></v-date-picker>
           </v-menu>
         </v-flex>
@@ -23,7 +23,12 @@
       <v-btn round color="secondary" class="primary--text" small dark @click="uploadDocument()">Submit Document</v-btn>
     </v-container>
   </v-form>
-  {{today}}
+  <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="15000">
+    {{ snackbarText }}
+    <v-btn dark flat @click="snackbar = false">
+      Close
+    </v-btn>
+  </v-snackbar>
 </div>
 </template>
 
@@ -44,8 +49,14 @@ export default {
   data() {
     return {
       date: new Date().toISOString().substr(0, 10),
+      dateRules: [
+        v => !!v || 'Expiration date is required'
+      ],
       today: new Date().toISOString().substr(0, 10).replace(/-/g, ""),
       numberId: null,
+      numberIdRules: [
+        v => !!v || 'Number ID is required'
+      ],
       menu2: false,
       documentTypes: [{
         label: 'Dni',
@@ -66,11 +77,20 @@ export default {
         label: 'Passport',
         component: 'PassportForm'
       }],
-      docTypeSelected: null
+      docTypeSelected: null,
+      snackbar: false,
+      snackbarText: 'error',
+      snackbarColor: 'error'
     }
   },
   methods: {
     uploadDocument() {
+      if (this.$refs.form.validate() == false || !this.docTypeSelected) {
+        this.snackbar = true;
+        this.snackbarText = 'Please fill all the data';
+        this.snackbarColor = 'error';
+        return;
+      }
       var documentData = {
         "userId": this.clientData.userId,
         "userNumberId": this.numberId,

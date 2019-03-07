@@ -10,8 +10,9 @@
     <v-spacer></v-spacer>
     <v-toolbar-title class="secondary--text display-2">Walidean</v-toolbar-title>
     <v-spacer></v-spacer>
-    <router-link class="secondary--text" to="/">Home</router-link>
-    <router-link class="secondary--text" to="/ClientDataRequest">ClientDataRequest</router-link>
+    <v-btn icon @click="$router.push('/ClientDataRequest');">
+      <v-icon color="secondary">person_add</v-icon>
+    </v-btn>
     <v-btn icon @click="goDark=!goDark">
       <v-icon color="secondary">brightness_medium</v-icon>
     </v-btn>
@@ -56,6 +57,7 @@ export default {
           this.$router.push('/'); // Home
         })
     }
+
   }
 }
 </script>

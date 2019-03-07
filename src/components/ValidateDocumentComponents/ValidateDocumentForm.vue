@@ -28,7 +28,12 @@
       <v-btn v-if="loaded == 0" round color="secondary" class="primary--text" small dark @click="uploadValidations()">Submit Validation</v-btn>
     </v-container>
   </v-form>
-  {{documentData}}
+  <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="15000">
+    {{ snackbarText }}
+    <v-btn dark flat @click="snackbar = false">
+      Close
+    </v-btn>
+  </v-snackbar>
 </div>
 </template>
 
@@ -46,7 +51,10 @@ export default {
       selected: [],
       loaded: 0,
       radius: 0,
-      tweenedRadius: 0
+      tweenedRadius: 0,
+      snackbar: false,
+      snackbarText: 'error',
+      snackbarColor: 'error'
     }
   },
   computed: {
@@ -69,6 +77,12 @@ export default {
   },
   methods: {
     uploadValidations: async function() {
+      var abort = false;
+      if (this.selected.length == 0) {
+        this.snackbar = true;
+        this.snackbarText = 'Please select at least one validation';
+        this.snackbarColor = 'error';
+      }
       this.loaded = 0.1;
       this.radius = 300;
       var context = this;
@@ -87,25 +101,26 @@ export default {
         "processDate": this.documentData.processDate,
         "expirationDate": this.documentData.expirationDate,
       }, config).then((response) => {
-        console.log("Respuesta subida fichero");
-        console.log(response.data);
         documentId = response.data.documentId;
+        context.loaded += 100 / (context.selected.length + 1)
+      }).catch((err) => {;
+        this.$router.go(-1)
+        abort = true;
       })
+      if (abort) {
+        return;
+      }
       var element;
       for (element in this.selected) {
-        console.log(element);
         await axios.post(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + documentId + '/validations', {
             "description": this.selected[element],
             "timestamp": new Date().toISOString().substr(0, 10).replace(/-/g, ""),
             "securityLevel": "ALTO"
           }, config)
           .then((response) => {
-            console.log("Respuesta subida validacion");
-            console.log(response.data);
-            context.loaded += 100 / context.selected.length
-          })
+            context.loaded += 100 / (context.selected.length + 1)
+          }).catch((err) => {})
       };
-
     }
   }
 }

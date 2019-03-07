@@ -34,11 +34,11 @@
             mobile_friendly
           </v-icon>
         </v-btn>
-        <v-btn icon>
+        <!--<v-btn icon>
           <v-icon @click="navigateToDoc(props.item.id)">
             wallpaper
           </v-icon>
-        </v-btn>
+        </v-btn>-->
       </td>
     </template>
   </v-data-table>
