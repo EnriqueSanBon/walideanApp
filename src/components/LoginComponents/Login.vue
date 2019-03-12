@@ -26,6 +26,9 @@ import consts from '../../consts.js';
 import firebase from "firebase";
 
 export default {
+  mounted() {
+
+  },
   data() {
     return {
       user: null,
@@ -44,6 +47,16 @@ export default {
   },
   methods: {
     loginUser() {
+      firebase.auth().signInWithEmailAndPassword("enrique.sanchez@walidean.com", "Optiva2018")
+        .then(() => {
+          console.log("Login correcto");
+        })
+        .catch((error) => {
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          console.log("Error login");
+          console.log(error.message);
+        });
       if (this.$refs.form.validate() == false) {
         this.snackbar = true;
         this.snackbarText = 'Error, enter correct client data';
@@ -65,13 +78,15 @@ export default {
         }, config)
         .then((response) => {
           if (response.status == 200) {
-            providersRef.where("userId", "==", this.user).get().then((querySnapshot) => {
+            providersRef.where("userId", "==", this.user).get()
+              .then((querySnapshot) => {
                 if (querySnapshot.size == 1) {
                   querySnapshot.forEach(function(doc) {
                     // doc.data() is never undefined for query doc snapshots
-                    context.$store.dispatch('setEthAddressAsync', doc.data().ethAddress).then(() => {
-                      context.$router.push('/ClientDataRequest');
-                    });
+                    context.$store.dispatch('setEthAddressAsync', doc.data().ethAddress)
+                      .then(() => {
+                        context.$router.push('/ClientDataRequest');
+                      });
                   });
                 } else {
                   context.snackbar = true;

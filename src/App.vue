@@ -33,11 +33,47 @@
 <script>
 import axios from 'axios';
 import consts from './consts.js';
+import firebase from "firebase";
+
 export default {
   name: 'App',
   components: {},
   mounted() {
-    this.$router.onReady(() => { this.$router.push('/') }, () => { this.$router.push('/') })
+    this.$router.onReady(() => {
+      this.$router.push('/')
+    }, () => {
+      this.$router.push('/')
+    })
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        console.log("User logged watcher" + user.uid);
+        // User is signed in.
+        var uid = user.uid;
+        var firestore = firebase.firestore();
+        var providersRef = firestore.collection("providers");
+        providersRef.where("UID", "==", uid).get()
+          .then((querySnapshot) => {
+            if (querySnapshot.size == 1) {
+              querySnapshot.forEach(function(doc) {
+                // doc.data() is never undefined for query doc snapshots
+                console.log("Consulta firestore");
+                console.log(doc.data());
+              });
+            } else {
+              console.log("Usuarios encontrados distinto de 1");
+            }
+          })
+          .catch(function(error) {
+            console.log("Error en la consulta");
+          });
+        // ...
+      } else {
+        console.log("User logout watcher");
+        // User is signed out.
+        // ...
+      }
+    });
   },
   data() {
     return {
@@ -50,6 +86,12 @@ export default {
       let config = {
         withCredentials: true
       }
+      firebase.auth().signOut().then(function() {
+        console.log("Firebase logout");
+      }).catch(function(error) {
+        console.log("Error logout firebase");
+        console.log(error.message);
+      });
       axios.delete(consts.ipPVIService + 'resources/authenticate/', config)
         .then(() => {
           this.$router.push('/'); // Home
