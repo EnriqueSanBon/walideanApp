@@ -47,74 +47,20 @@ export default {
   },
   methods: {
     loginUser() {
-      firebase.auth().signInWithEmailAndPassword("enrique.sanchez@walidean.com", "Optiva2018")
-        .then(() => {
-          console.log("Login correcto");
-        })
-        .catch((error) => {
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          console.log("Error login");
-          console.log(error.message);
-        });
+      var context = this;
       if (this.$refs.form.validate() == false) {
         this.snackbar = true;
         this.snackbarText = 'Error, enter correct client data';
         return;
       }
-      var context = this;
-      //this should be on the then
-      var firestore = firebase.firestore();
-      var providersRef = firestore.collection("providers");
-      let config = {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true
-      }
-      axios.post(consts.ipPVIService + 'resources/authenticate', {
-          "user": this.user,
-          "pass": this.pass
-        }, config)
-        .then((response) => {
-          if (response.status == 200) {
-            providersRef.where("userId", "==", this.user).get()
-              .then((querySnapshot) => {
-                if (querySnapshot.size == 1) {
-                  querySnapshot.forEach(function(doc) {
-                    // doc.data() is never undefined for query doc snapshots
-                    context.$store.dispatch('setEthAddressAsync', doc.data().ethAddress)
-                      .then(() => {
-                        context.$router.push('/ClientDataRequest');
-                      });
-                  });
-                } else {
-                  context.snackbar = true;
-                  context.snackbarText = 'User or password invalid';
-                }
-              })
-              .catch(function(error) {
-                context.snackbar = true;
-                context.snackbarText = 'Error: '
-                error;
-              });
-            this.$router.push('/ClientDataRequest');
-          }
-        }).catch((error) => {
-          if (error.message === "Network Error") {
-            context.snackbar = true;
-            context.snackbarText = 'Network Error';
-          } else {
-            context.snackbar = true;
-            switch (error.response.status) {
-              case 401:
-                context.snackbarText = 'User or password invalid';
-                break;
-              default:
-                context.snackbarText = error.response.statusText;
-            }
-          }
+      firebase.auth().signInWithEmailAndPassword(this.user, this.pass)
+        .then(() => {
+          console.log("Login correcto");
         })
+        .catch((error) => {
+          context.snackbar = true;
+          context.snackbarText = error.message;
+        });
     }
   }
 }
