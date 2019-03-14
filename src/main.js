@@ -2,19 +2,14 @@ import Vue from 'vue'
 import './plugins/vuetify'
 import App from './App.vue'
 import router from './router'
-import { store } from './store.js'
+import {
+  store
+} from './store.js'
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import firebase from "firebase";
 
 Vue.config.productionTip = false
-
-new Vue({
-  router,
-  store: store,
-  render: h => h(App)
-}).$mount('#app')
-
 var config = {
   apiKey: "AIzaSyBVwrpVjSABKmSQ-5H_QFXiBPzKfcTAOkA",
   authDomain: "walidean.firebaseapp.com",
@@ -24,6 +19,14 @@ var config = {
   messagingSenderId: "832613647991"
 };
 firebase.initializeApp(config);
+
+new Vue({
+  router,
+  store: store,
+  render: h => h(App)
+}).$mount('#app')
+
+
 
 /*var mock = new MockAdapter(axios);
 mock.onGet('http://localhost:8080/PVIService/resources/users/3').reply(200, {
