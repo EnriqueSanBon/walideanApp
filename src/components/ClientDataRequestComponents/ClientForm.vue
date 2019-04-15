@@ -34,17 +34,17 @@ export default {
   data() {
     return {
       valid: true,
-      dni: "",
+      dni: "53823177J",
       dniRules: [
         v => !!v || 'Name is required',
         v => (v && v.length <= 10) || 'Name must be less than 10 characters'
       ],
-      phone: "",
+      phone: "enriquesanchezbonet@gmail.com",
       emailRules: [
         v => !!v || 'E-mail is required',
         v => /.+@.+/.test(v) || 'E-mail must be valid'
       ],
-      token: '',
+      token: 'vDyYRf',
       idUserFound: null,
       documentTypes: consts.documentTypes,
       documentsSelected: [],
@@ -104,6 +104,7 @@ export default {
       return promise
     },
     sendToken() {
+      console.log("Manda token");
       var context = this;
       let config = {
         headers: {

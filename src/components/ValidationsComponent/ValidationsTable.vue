@@ -20,6 +20,7 @@
 import { mapState } from 'vuex';
 import axios from 'axios';
 import consts from '../../consts.js';
+import firebase from "firebase";
 export default {
   computed: mapState(['clientData', 'token']),
   components: {},
@@ -39,7 +40,6 @@ export default {
   },
   methods: {
     getValidations() {
-      console.log("Consulta validaciones");
       let config = {
         headers: {
           'securityCode': this.token
@@ -48,10 +48,6 @@ export default {
       }
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/' + this.$route.params.id + '/validations', config)
         .then((response) => {
-          console.log("Consulta Validaciones");
-          console.log("Token en validaciones");
-          console.log(this.token);
-          console.log(response.data);
           this.gridData = response.data.validations;
           if (response.data.validations.length == 0) {
             this.noDataFlag = true;
