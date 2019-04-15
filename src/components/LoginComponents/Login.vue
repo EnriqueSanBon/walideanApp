@@ -26,16 +26,14 @@ import consts from '../../consts.js';
 import firebase from "firebase";
 
 export default {
-  mounted() {
-
-  },
+  mounted() {},
   data() {
     return {
-      user: null,
+      user: "enrique.sanchez@walidean.com",
       userRules: [
         v => !!v || 'User is required'
       ],
-      pass: null,
+      pass: "Optiva2018",
       passRules: [
         v => !!v || 'Password is required'
       ],

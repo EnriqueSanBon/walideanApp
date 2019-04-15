@@ -19,6 +19,11 @@
             <v-date-picker v-model="date" @change="menu2 = false"></v-date-picker>
           </v-menu>
         </v-flex>
+        <v-flex xs12 sm8>
+          <img v-for="imageUrl in imageUrls" :src="imageUrl" height="150" v-if="imageUrl" />
+          <v-text-field label="Select Images" @click='pickFile' prepend-icon='attach_file' v-model="imageNamesString"></v-text-field>
+          <input type="file" style="display: none" ref="image" accept="image/*" @change="onFilePicked" multiple>
+        </v-flex>
       </v-layout>
       <v-btn round color="secondary" class="primary--text" small dark @click="uploadDocument()">Submit Document</v-btn>
     </v-container>
@@ -36,6 +41,8 @@
 import { mapState } from 'vuex';
 import axios from 'axios';
 import consts from '../../consts.js';
+import firebase from "firebase";
+import uuidv4 from "uuid/v4";
 
 export default {
   computed: {
@@ -80,11 +87,71 @@ export default {
       docTypeSelected: null,
       snackbar: false,
       snackbarText: 'error',
-      snackbarColor: 'error'
+      snackbarColor: 'error',
+      imageNames: [],
+      imageNamesString: '',
+      imageUrls: [],
+      imageFiles: [],
+      folderUUID: ''
     }
   },
   methods: {
+    pickFile() {
+      this.$refs.image.click()
+    },
+
+    onFilePicked(e) {
+      console.log("Archivo seleccionado");
+      console.log(e);
+      var context = this;
+      this.imageNames = [];
+      this.imageUrls = [];
+      this.imageFiles = [];
+      const files = Array.from(e.target.files)
+      files.forEach(function(file) {
+        console.log(file);
+        if (file !== undefined) {
+          if (file.name.lastIndexOf('.') <= 0) {
+            return
+          }
+          context.imageNames.push(file.name)
+          const fr = new FileReader()
+          fr.readAsDataURL(file)
+          fr.addEventListener('load', () => {
+            console.log("load listener");
+            context.imageUrls.push(fr.result);
+            context.imageFiles.push(file) // this is an image file that can be sent to server...
+          })
+        } else {
+          console.log("file undefined");
+        }
+      });
+      this.imageNamesString = this.imageNames.toString();
+    },
     uploadDocument() {
+      var storage = firebase.storage();
+      var firestore = firebase.firestore();
+      var context = this;
+      this.folderUUID = uuidv4();
+      var storageRef = storage.ref(this.folderUUID);
+      firestore.collection("documents").doc(context.folderUUID).set({
+          allowedUsers: [],
+          files: this.imageNames
+        })
+        .then(function() {
+          console.log("Document successfully written!");
+        })
+        .catch(function(error) {
+          console.error("Error writing document: ", error);
+        });
+      this.imageFiles.forEach(function(file) {
+        var fileRef = storageRef.child(file.name);
+        fileRef.put(file)
+          .then(function(snapshot) {
+            console.log('Uploaded a blob or file!');
+          });
+      })
+
       if (this.$refs.form.validate() == false || !this.docTypeSelected) {
         this.snackbar = true;
         this.snackbarText = 'Please fill all the data';
@@ -95,7 +162,7 @@ export default {
         "userId": this.clientData.userId,
         "userNumberId": this.numberId,
         "docType": this.docTypeSelected.label,
-        "item": "http://prueba",
+        "item": this.folderUUID,
         "processDate": this.today,
         "expirationDate": this.formatedDate
       }
