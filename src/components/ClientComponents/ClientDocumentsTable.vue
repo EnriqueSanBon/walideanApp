@@ -11,8 +11,8 @@
     <template slot="items" slot-scope="props">
       <td>{{ props.item.docType }}</td>
       <td class="text-xs">{{props.item.id}}</td>
-      <td class="text-xs">{{ props.item.expirationDate }}</td>
-      <td class="text-xs">{{ props.item.processDate }}</td>
+      <td class="text-xs">{{ props.item.expirationDateString }}</td>
+      <td class="text-xs">{{ props.item.processDateString }}</td>
       <td class="justify-center layout px-0">
         <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id)">
           <v-icon>
@@ -53,8 +53,8 @@
     <template slot="items" slot-scope="props">
       <td>{{ props.item.docType }}</td>
       <td class="text-xs">{{props.item.id}}</td>
-      <td class="text-xs">{{ props.item.expirationDate }}</td>
-      <td class="text-xs">{{ props.item.processDate }}</td>
+      <td class="text-xs">{{ props.item.expirationDateString }}</td>
+      <td class="text-xs">{{ props.item.processDateString }}</td>
       <td class="justify-center layout px-0">
         <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id)">
           <v-icon>
@@ -118,8 +118,8 @@ export default {
       headers: [
         { text: 'Document type', align: 'left', value: 'docType' },
         { text: 'Id', align: 'left', value: 'id' },
-        { text: 'Expiration Date', value: 'expirationDate' },
-        { text: 'Process Date', value: 'processDate' },
+        { text: 'Expiration Date', value: 'expirationDateString' },
+        { text: 'Process Date', value: 'processDateString' },
         { text: 'Actions', align: 'center', sorteable: false, value: 'name' }
       ],
       dialog: false,
@@ -153,7 +153,12 @@ export default {
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/', config)
         .then((response) => {
           const today = new Date().toISOString().substr(0, 10).replace(/-/g, "")
-          this.gridData = response.data.documents;
+          this.gridData = response.data.documents.map(element => {
+            element.expirationDateString = [element.expirationDate.toString().slice(0, 4), "-", element.expirationDate.toString().slice(4, 6), "-", element.expirationDate.toString().slice(6)].join('');
+            element.processDateString = [element.processDate.toString().slice(0, 4), "-", element.processDate.toString().slice(4, 6), "-", element.processDate.toString().slice(6)].join('');
+            return element
+          });
+          console.log(this.gridData);
           this.oldDocuments = this.gridData.filter(document => document.expirationDate < today)
           this.newDocuments = this.gridData.filter(document => document.expirationDate > today)
           if (response.data.documents.length == 0) {
