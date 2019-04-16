@@ -1,7 +1,8 @@
 <template>
 <div>
   <v-progress-linear v-if="gridData.length==0 && !noDataFlag" :indeterminate="true"></v-progress-linear>
-  <v-data-table :headers="headers" :items="gridData" class="elevation-1" color='primary'>
+  <h3>Current Documents</h3>
+  <v-data-table :headers="headers" :items="newDocuments" class="elevation-1" color='primary'>
     <template slot="no-data">
       <v-alert :value="noDataFlag" color="error" icon="warning">
         {{emptyTableText}}
@@ -10,8 +11,50 @@
     <template slot="items" slot-scope="props">
       <td>{{ props.item.docType }}</td>
       <td class="text-xs">{{props.item.id}}</td>
-      <td class="text-xs">{{ props.item.expirationDate }}</td>
-      <td class="text-xs">{{ props.item.processDate }}</td>
+      <td class="text-xs">{{ props.item.expirationDateString }}</td>
+      <td class="text-xs">{{ props.item.processDateString }}</td>
+      <td class="justify-center layout px-0">
+        <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id)">
+          <v-icon>
+            mobile_friendly
+          </v-icon>
+        </v-btn>
+        <v-dialog v-model="dialog" persistent max-width="290">
+          <v-card>
+            <v-card-title class="headline">Purchase this document?</v-card-title>
+            <v-card-text>You will pay 5 WLD to the owner of the document.</v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="green darken-1" flat @click="dialog = false">Disagree</v-btn>
+              <v-btn color="green darken-1" flat @click="purchaseDocument(selectedDocId)">Agree</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-btn icon v-if="docsPurchased.includes(props.item.id)" @click="navigateToVal(props.item.id)">
+          <v-icon color="primary">
+            mobile_friendly
+          </v-icon>
+        </v-btn>
+        <!--<v-btn icon>
+          <v-icon @click="navigateToDoc(props.item.id)">
+            wallpaper
+          </v-icon>
+        </v-btn>-->
+      </td>
+    </template>
+  </v-data-table>
+  <h3>Expired Documents</h3>
+  <v-data-table :headers="headers" :items="oldDocuments" class="elevation-1" color='primary'>
+    <template slot="no-data">
+      <v-alert :value="noDataFlag" color="error" icon="warning">
+        {{emptyTableText}}
+      </v-alert>
+    </template>
+    <template slot="items" slot-scope="props">
+      <td>{{ props.item.docType }}</td>
+      <td class="text-xs">{{props.item.id}}</td>
+      <td class="text-xs">{{ props.item.expirationDateString }}</td>
+      <td class="text-xs">{{ props.item.processDateString }}</td>
       <td class="justify-center layout px-0">
         <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id)">
           <v-icon>
@@ -69,12 +112,14 @@ export default {
     return {
       searchQuery: '',
       gridData: [],
+      oldDocuments: [],
+      newDocuments: [],
       emptyTableText: 'Sorry, nothing to display here :(',
       headers: [
         { text: 'Document type', align: 'left', value: 'docType' },
         { text: 'Id', align: 'left', value: 'id' },
-        { text: 'Expiration Date', value: 'expirationDate' },
-        { text: 'Process Date', value: 'processDate' },
+        { text: 'Expiration Date', value: 'expirationDateString' },
+        { text: 'Process Date', value: 'processDateString' },
         { text: 'Actions', align: 'center', sorteable: false, value: 'name' }
       ],
       dialog: false,
@@ -107,7 +152,15 @@ export default {
       }
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/', config)
         .then((response) => {
-          this.gridData = response.data.documents;
+          const today = new Date().toISOString().substr(0, 10).replace(/-/g, "")
+          this.gridData = response.data.documents.map(element => {
+            element.expirationDateString = [element.expirationDate.toString().slice(0, 4), "-", element.expirationDate.toString().slice(4, 6), "-", element.expirationDate.toString().slice(6)].join('');
+            element.processDateString = [element.processDate.toString().slice(0, 4), "-", element.processDate.toString().slice(4, 6), "-", element.processDate.toString().slice(6)].join('');
+            return element
+          });
+          console.log(this.gridData);
+          this.oldDocuments = this.gridData.filter(document => document.expirationDate < today)
+          this.newDocuments = this.gridData.filter(document => document.expirationDate > today)
           if (response.data.documents.length == 0) {
             this.noDataFlag = true;
             this.emptyTableText = "No documents for this user"
