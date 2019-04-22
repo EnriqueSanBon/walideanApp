@@ -73,9 +73,14 @@ export default {
                   }, config)
                   .then((response) => {
                     if (response.status == 200) {
+                      console.log("Doc data");
+                      console.log(doc.data());
                       store.dispatch('setEthAddressAsync', doc.data().ethAddress)
                         .then(() => {
-                          router.push('/ClientDataRequest');
+                          store.dispatch('setProviderIdAsync', doc.data().pviId)
+                            .then(() => {
+                              router.push('/ClientDataRequest');
+                            });
                         });
                     }
                   }).catch((error) => {
