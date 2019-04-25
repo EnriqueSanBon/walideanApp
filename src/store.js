@@ -9,12 +9,14 @@ export const store = new Vuex.Store({
     token: null,
     clientData: null,
     ethAddress: null,
+    providerId: null,
     docsPurchased: []
   },
   mutations: {
     setToken: (state, token) => state.token = token,
     setClientData: (state, clientData) => state.clientData = clientData,
     setEthAddress: (state, ethAddress) => state.ethAddress = ethAddress,
+    setProviderId: (state, providerId) => state.providerId = providerId,
     addDoc: (state, docId) => state.docsPurchased.push(docId)
   },
   actions: {
@@ -47,6 +49,9 @@ export const store = new Vuex.Store({
     },
     setEthAddressAsync: (context, ethAddress) => {
       context.commit('setEthAddress', ethAddress);
+    },
+    setProviderIdAsync: (context, providerId) => {
+      context.commit('setProviderId', providerId);
     }
   },
 });

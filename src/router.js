@@ -7,6 +7,8 @@ import Client from './views/Client.vue'
 import Document from './views/Document.vue'
 import Validations from './views/Validations.vue'
 import ValidateDocument from './views/ValidateDocument.vue'
+import UserPanel from './views/UserPanel.vue'
+import UserTokenRequest from './views/UserTokenRequest.vue'
 import Statics from './views/Statics.vue'
 
 Vue.use(Router)
@@ -36,6 +38,9 @@ export default new Router({
       path: '/document/:id/validations',
       component: Validations
     }, {
+      path: '/UserTokenRequest',
+      component: UserTokenRequest
+    }, {
       path: '/UploadFile/validateDocument',
       component: ValidateDocument,
       name: 'validateDocument',
@@ -43,6 +48,9 @@ export default new Router({
     }, {
       path: '/Statics/',
       component: Statics
+    }, {
+      path: '/UserPanel/',
+      component: UserPanel
     },
     {
       path: '/about',

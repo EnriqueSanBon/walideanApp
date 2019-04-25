@@ -14,7 +14,7 @@
       <td class="text-xs">{{ props.item.expirationDateString }}</td>
       <td class="text-xs">{{ props.item.processDateString }}</td>
       <td class="justify-center layout px-0">
-        <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id)">
+        <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id, props.item.docType)">
           <v-icon>
             mobile_friendly
           </v-icon>
@@ -56,7 +56,7 @@
       <td class="text-xs">{{ props.item.expirationDateString }}</td>
       <td class="text-xs">{{ props.item.processDateString }}</td>
       <td class="justify-center layout px-0">
-        <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id)">
+        <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="openModal(props.item.id, props.item.docType)">
           <v-icon>
             mobile_friendly
           </v-icon>
@@ -95,7 +95,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {
+  mapState
+} from 'vuex';
 import axios from 'axios';
 import consts from '../../consts.js';
 import firebase from "firebase";
@@ -115,12 +117,30 @@ export default {
       oldDocuments: [],
       newDocuments: [],
       emptyTableText: 'Sorry, nothing to display here :(',
-      headers: [
-        { text: 'Document type', align: 'left', value: 'docType' },
-        { text: 'Id', align: 'left', value: 'id' },
-        { text: 'Expiration Date', value: 'expirationDateString' },
-        { text: 'Process Date', value: 'processDateString' },
-        { text: 'Actions', align: 'center', sorteable: false, value: 'name' }
+      headers: [{
+          text: 'Document type',
+          align: 'left',
+          value: 'docType'
+        },
+        {
+          text: 'Id',
+          align: 'left',
+          value: 'id'
+        },
+        {
+          text: 'Expiration Date',
+          value: 'expirationDateString'
+        },
+        {
+          text: 'Process Date',
+          value: 'processDateString'
+        },
+        {
+          text: 'Actions',
+          align: 'center',
+          sorteable: false,
+          value: 'name'
+        }
       ],
       dialog: false,
       abi: consts.abi,
@@ -129,6 +149,7 @@ export default {
       snackbarColor: 'error',
       snackbar: false,
       selectedDocId: null,
+      selectedDocType: null,
       noDataFlag: false
     }
   },
@@ -139,9 +160,10 @@ export default {
     navigateToVal: function(id) {
       this.$router.push('/document/' + id + '/validations');
     },
-    openModal(selectedDocId) {
+    openModal(selectedDocId, selectedDocType) {
       this.dialog = true;
       this.selectedDocId = selectedDocId;
+      this.selectedDocType = selectedDocType;
     },
     getDocuments() {
       let config = {
@@ -178,6 +200,8 @@ export default {
     },
     purchaseDocumentTransaction(ownerAdress, documentPurchasedId) {
       var context = this;
+      var firestore = firebase.firestore();
+      var accessHistoryRef = firestore.collection("accessHistory");
       if (window.ethereum) {
         window.web3 = new Web3(ethereum);
         try { // Solicitar autorización a MetaMask (si fuese necesario)
@@ -189,8 +213,23 @@ export default {
             walidean.transfer('0x' + ownerAdress, 5, function(error, result) {
               if (!error) {
                 context.$store.dispatch('addDocAsync', documentPurchasedId).then(() => {
+                  // Add a new document in collection "cities"
+                  accessHistoryRef.doc().set({
+                      date: firebase.firestore.FieldValue.serverTimestamp(),
+                      documentId: documentPurchasedId,
+                      documentType: context.selectedDocType,
+                      providerId: context.$store.state.providerId,
+                      userId: context.$store.state.clientData.userId
+                    })
+                    .then(function() {
+                      console.log("Document successfully written!");
+                      context.navigateToVal(documentPurchasedId);
+                    })
+                    .catch(function(error) {
+                      console.error("Error writing document: ", error);
+                      context.navigateToVal(documentPurchasedId);
+                    });
                   //pasar al siguiente modulo
-                  context.navigateToVal(documentPurchasedId);
                 })
               } else {
                 context.snackbar = true;
@@ -215,6 +254,7 @@ export default {
     purchaseDocument(documentPurchasedId) {
       var context = this;
       var firestore = firebase.firestore();
+      var accessHistoryRef = firestore.collection("accessHistory");
       var providersRef = firestore.collection("providers");
       let config = {
         headers: {
@@ -229,7 +269,21 @@ export default {
               querySnapshot.forEach(function(doc) {
                 // doc.data() is never undefined for query doc snapshots
                 if (context.ethAddress.toLowerCase() == doc.data().ethAddress.toLowerCase()) {
-                  context.navigateToVal(documentPurchasedId);
+                  accessHistoryRef.doc().set({
+                      date: firebase.firestore.FieldValue.serverTimestamp(),
+                      documentId: documentPurchasedId,
+                      documentType: context.selectedDocType,
+                      providerId: context.$store.state.providerId,
+                      userId: context.$store.state.clientData.userId
+                    })
+                    .then(function() {
+                      console.log("Document successfully written!");
+                      context.navigateToVal(documentPurchasedId);
+                    })
+                    .catch(function(error) {
+                      console.error("Error writing document: ", error);
+                      context.navigateToVal(documentPurchasedId);
+                    });
                 } else {
                   context.purchaseDocumentTransaction(doc.data().ethAddress, documentPurchasedId)
                 }

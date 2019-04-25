@@ -10,7 +10,7 @@
     <v-spacer></v-spacer>
     <v-toolbar-title class="secondary--text display-2">Walidean</v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-btn icon @click="$router.push('/ClientDataRequest');">
+    <v-btn v-if="$store.state.clientData" icon @click="$router.push('/ClientDataRequest');">
       <v-icon color="secondary">person_add</v-icon>
     </v-btn>
     <v-btn icon @click="goDark=!goDark">
@@ -58,45 +58,60 @@ export default {
             var context = this;
             if (querySnapshot.size == 1) {
               querySnapshot.forEach(function(doc) {
-                // doc.data() is never undefined for query doc snapshots
-                console.log("Consulta firestore");
-                console.log(doc.data());
-                let config = {
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  withCredentials: true
-                }
-                axios.post(consts.ipPVIService + 'resources/authenticate', {
-                    "user": doc.data().userId,
-                    "pass": doc.data().userId
-                  }, config)
-                  .then((response) => {
-                    if (response.status == 200) {
-                      store.dispatch('setEthAddressAsync', doc.data().ethAddress)
-                        .then(() => {
-                          router.push('/ClientDataRequest');
-                        });
-                    }
-                  }).catch((error) => {
-                    console.log(error);
-                    if (error.message === "Network Error") {
-                      context.snackbar = true;
-                      context.snackbarText = 'Network Error';
-                      console.log('Network Error');
-                    } else {
-                      context.snackbar = true;
-                      switch (error.response.status) {
-                        case 401:
-                          context.snackbarText = 'User or password invalid';
-                          console.log('User or password invalid');
-                          break;
-                        default:
-                          console.log(error.response.statusText);
-                          context.snackbarText = error.response.statusText;
+                console.log("profile");
+                console.log(doc.data().profile);
+                if (doc.data().profile === "provider") {
+                  // doc.data() is never undefined for query doc snapshots
+                  console.log("Consulta firestore");
+                  console.log(doc.data());
+                  let config = {
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    withCredentials: true
+                  }
+                  axios.post(consts.ipPVIService + 'resources/authenticate', {
+                      "user": doc.data().userId,
+                      "pass": doc.data().userId
+                    }, config)
+                    .then((response) => {
+                      if (response.status == 200) {
+                        console.log("Doc data");
+                        console.log(doc.data());
+                        store.dispatch('setEthAddressAsync', doc.data().ethAddress)
+                          .then(() => {
+                            store.dispatch('setProviderIdAsync', doc.data().pviId)
+                              .then(() => {
+                                router.push('/ClientDataRequest');
+                              });
+                          });
                       }
-                    }
-                  })
+                    }).catch((error) => {
+                      console.log(error);
+                      if (error.message === "Network Error") {
+                        context.snackbar = true;
+                        context.snackbarText = 'Network Error';
+                        console.log('Network Error');
+                      } else {
+                        context.snackbar = true;
+                        switch (error.response.status) {
+                          case 401:
+                            context.snackbarText = 'User or password invalid';
+                            console.log('User or password invalid');
+                            break;
+                          default:
+                            console.log(error.response.statusText);
+                            context.snackbarText = error.response.statusText;
+                        }
+                      }
+                    })
+                } else if (doc.data().profile === "user") {
+                  console.log("Logueado como usuario");
+                  store.dispatch('setProviderIdAsync', doc.data().pviId)
+                    .then(() => {
+                      return router.push('/UserTokenRequest');
+                    })
+                }
               });
             } else {
               console.log("Usuarios encontrados distinto de 1");
