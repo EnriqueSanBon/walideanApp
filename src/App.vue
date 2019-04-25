@@ -109,7 +109,7 @@ export default {
                   console.log("Logueado como usuario");
                   store.dispatch('setProviderIdAsync', doc.data().pviId)
                     .then(() => {
-                      router.push('/userPanel');
+                      router.push('/UserTokenRequest');
                     });
                 }
               });
