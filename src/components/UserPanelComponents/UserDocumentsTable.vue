@@ -14,7 +14,28 @@
       <td class="text-xs">{{ props.item.expirationDateString }}</td>
       <td class="text-xs">{{ props.item.processDateString }}</td>
       <td class="justify-center layout px-0">
-        <v-btn v-if="!docsPurchased.includes(props.item.id)" icon @click="navigateToVal(props.item.id)">
+        <v-btn icon @click="navigateToVal(props.item.id)">
+          <v-icon>
+            mobile_friendly
+          </v-icon>
+        </v-btn>
+      </td>
+    </template>
+  </v-data-table>
+  <h3>Expired Documents</h3>
+  <v-data-table :headers="headers" :items="oldDocuments" class="elevation-1" color='primary'>
+    <template slot="no-data">
+      <v-alert :value="noDataFlag" color="error" icon="warning">
+        {{emptyTableText}}
+      </v-alert>
+    </template>
+    <template slot="items" slot-scope="props">
+      <td>{{ props.item.docType }}</td>
+      <td class="text-xs">{{props.item.id}}</td>
+      <td class="text-xs">{{ props.item.expirationDateString }}</td>
+      <td class="text-xs">{{ props.item.processDateString }}</td>
+      <td class="justify-center layout px-0">
+        <v-btn icon @click="navigateToVal(props.item.id)">
           <v-icon>
             mobile_friendly
           </v-icon>
@@ -36,9 +57,6 @@ export default {
   computed: mapState(['clientData', 'docsPurchased', 'token', 'ethAddress']),
   components: {},
   mounted() {
-    if (!this.clientData) {
-      this.$router.push('/ClientDataRequest');
-    }
     this.getDocuments();
   },
   data() {
@@ -86,7 +104,7 @@ export default {
         },
         withCredentials: true
       }
-      axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/', config)
+      axios.get(consts.ipPVIService + 'resources/users/' + this.$store.state.providerId + '/documents/', config)
         .then((response) => {
           const today = new Date().toISOString().substr(0, 10).replace(/-/g, "")
           this.gridData = response.data.documents.map(element => {

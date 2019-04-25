@@ -29,7 +29,7 @@ export default {
   data() {
     return {
       valid: true,
-      token: 'vDyYRf',
+      token: '',
       idUserFound: null,
       documentTypes: consts.documentTypes,
       documentsSelected: consts.documentTypes,
@@ -54,7 +54,7 @@ export default {
         }, config)
         .then((response) => {
           axios.put(consts.ipPVIService + 'resources/users/' + this.$store.state.providerId + '/token/', {
-              "docTypes": this.documentsSelected
+              "docTypes": this.documentTypes
             }, config)
             .then(() => {
               context.snackbarColor = 'success';

@@ -46,7 +46,7 @@ export default {
         },
         withCredentials: true
       }
-      axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/' + this.$route.params.id + '/validations', config)
+      axios.get(consts.ipPVIService + 'resources/users/' + (this.clientData ? this.clientData.userId : this.$store.state.providerId) + '/documents/' + this.$route.params.id + '/validations', config)
         .then((response) => {
           this.gridData = response.data.validations;
           if (response.data.validations.length == 0) {

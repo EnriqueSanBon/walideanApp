@@ -10,7 +10,7 @@
     <v-spacer></v-spacer>
     <v-toolbar-title class="secondary--text display-2">Walidean</v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-btn icon @click="$router.push('/ClientDataRequest');">
+    <v-btn v-if="$store.state.clientData" icon @click="$router.push('/ClientDataRequest');">
       <v-icon color="secondary">person_add</v-icon>
     </v-btn>
     <v-btn icon @click="goDark=!goDark">
@@ -109,8 +109,8 @@ export default {
                   console.log("Logueado como usuario");
                   store.dispatch('setProviderIdAsync', doc.data().pviId)
                     .then(() => {
-                      router.push('/UserTokenRequest');
-                    });
+                      return router.push('/UserTokenRequest');
+                    })
                 }
               });
             } else {

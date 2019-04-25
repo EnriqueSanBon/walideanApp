@@ -1,12 +1,12 @@
 <template>
 <div>
-  <p>Este es tu historial de acceso a tus datos</p>
+  <h3>Access History to your Documents</h3>
   <v-data-table :headers="headers" :items="gridData" class="elevation-1" color='primary'>
     <template slot="items" slot-scope="props">
-      <td>{{ props.item.date }}</td>
-      <td class="text-xs">{{props.item.documentId}}</td>
-      <td class="text-xs">{{ props.item.documentType }}</td>
-      <td class="text-xs">{{ props.item.providerId }}</td>
+      <td class="text-xs-center">{{ props.item.date }}</td>
+      <td class="text-xs-center">{{props.item.documentId}}</td>
+      <td class="text-xs-center">{{ props.item.documentType }}</td>
+      <td class="text-xs-center">{{ props.item.providerId }}</td>
     </template>
   </v-data-table>
 </div>
@@ -24,22 +24,22 @@ export default {
       gridData: [],
       headers: [{
           text: 'Date',
-          align: 'left',
+          align: 'center',
           value: 'date'
         },
         {
           text: 'Document Id',
-          align: 'left',
+          align: 'center',
           value: 'documentId'
         },
         {
           text: 'Document Type',
-          align: 'left',
+          align: 'center',
           value: 'documentType'
         },
         {
           text: 'Provider Id',
-          align: 'left',
+          align: 'center',
           value: 'providerId'
         }
       ],
