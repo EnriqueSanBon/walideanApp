@@ -7,6 +7,11 @@
           <v-text-field v-model="user" :rules="userRules" label="Usuario" required></v-text-field>
           <v-text-field v-model="pass" :rules="passRules" :counter="20" label="Contraseña" required type="password"></v-text-field>
           <v-btn round color="secondary" class="primary--text" dark @click="loginUser()">Login</v-btn>
+          <v-flex xs12 sm12>
+            <div class="subheading">Do you have authorized Walidean to manage your data and not registered yet?</div>
+            <span class="font-weight-bold subheading" @click="$router.push('/Register');">Sign In</span>
+            <span class="subheading"> to know by who and when your data is accessed</span>
+          </v-flex>
         </v-flex>
       </v-layout>
     </v-container>

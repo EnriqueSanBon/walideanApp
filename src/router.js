@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
+import Register from './views/Register.vue'
 import ClientDataRequest from './views/ClientDataRequest.vue'
 import UploadFile from './views/UploadFile.vue'
 import Client from './views/Client.vue'
@@ -18,6 +19,10 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home
+    }, {
+      path: '/Register',
+      name: 'Register',
+      component: Register
     }, {
       path: '/ClientDataRequest',
       name: 'clientDataRequest',
