@@ -4,7 +4,6 @@
   <v-data-table :headers="headers" :items="gridData" class="elevation-1" color='primary'>
     <template slot="items" slot-scope="props">
       <td class="text-xs-center">{{ props.item.date }}</td>
-      <td class="text-xs-center">{{props.item.documentId}}</td>
       <td class="text-xs-center">{{ props.item.documentType }}</td>
       <td class="text-xs-center">{{ props.item.providerId }}</td>
     </template>
@@ -26,11 +25,6 @@ export default {
           text: 'Date',
           align: 'center',
           value: 'date'
-        },
-        {
-          text: 'Document Id',
-          align: 'center',
-          value: 'documentId'
         },
         {
           text: 'Document Type',

@@ -10,7 +10,6 @@
     </template>
     <template slot="items" slot-scope="props">
       <td>{{ props.item.docType }}</td>
-      <td class="text-xs">{{props.item.id}}</td>
       <td class="text-xs">{{ props.item.expirationDateString }}</td>
       <td class="text-xs">{{ props.item.processDateString }}</td>
       <td class="justify-center layout px-0">
@@ -31,7 +30,6 @@
     </template>
     <template slot="items" slot-scope="props">
       <td>{{ props.item.docType }}</td>
-      <td class="text-xs">{{props.item.id}}</td>
       <td class="text-xs">{{ props.item.expirationDateString }}</td>
       <td class="text-xs">{{ props.item.processDateString }}</td>
       <td class="justify-center layout px-0">
@@ -69,11 +67,6 @@ export default {
           text: 'Document type',
           align: 'left',
           value: 'docType'
-        },
-        {
-          text: 'Id',
-          align: 'left',
-          value: 'id'
         },
         {
           text: 'Expiration Date',

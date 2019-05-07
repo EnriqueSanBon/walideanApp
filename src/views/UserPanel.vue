@@ -1,9 +1,9 @@
 <template>
 <v-layout align-center justify-space-around row fill-height wrap>
-  <v-flex xs12>
+  <v-flex xs12 sm4>
     <AccessTable />
   </v-flex>
-  <v-flex xs12>
+  <v-flex xs12 sm7>
     <UserDocumentsTable />
   </v-flex>
 </v-layout>
