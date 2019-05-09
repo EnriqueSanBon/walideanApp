@@ -35,11 +35,6 @@
             mobile_friendly
           </v-icon>
         </v-btn>
-        <!--<v-btn icon>
-          <v-icon @click="navigateToDoc(props.item.id)">
-            wallpaper
-          </v-icon>
-        </v-btn>-->
       </td>
     </template>
   </v-data-table>
@@ -77,11 +72,6 @@
             mobile_friendly
           </v-icon>
         </v-btn>
-        <!--<v-btn icon>
-          <v-icon @click="navigateToDoc(props.item.id)">
-            wallpaper
-          </v-icon>
-        </v-btn>-->
       </td>
     </template>
   </v-data-table>
@@ -113,6 +103,7 @@ export default {
   data() {
     return {
       searchQuery: '',
+      firebaseDocumentId: '',
       gridData: [],
       oldDocuments: [],
       newDocuments: [],
@@ -154,9 +145,6 @@ export default {
     }
   },
   methods: {
-    navigateToDoc: function(id) {
-      this.$router.push('/document/:' + id);
-    },
     navigateToVal: function(id) {
       this.$router.push('/document/' + id + '/validations');
     },
@@ -202,6 +190,8 @@ export default {
       var context = this;
       var firestore = firebase.firestore();
       var accessHistoryRef = firestore.collection("accessHistory");
+      var documentsRef = firestore.collection("documents").doc(this.firebaseDocumentId);
+      var user = firebase.auth().currentUser;
       if (window.ethereum) {
         window.web3 = new Web3(ethereum);
         try { // Solicitar autorización a MetaMask (si fuese necesario)
@@ -221,7 +211,34 @@ export default {
                       providerId: context.$store.state.providerId,
                       userId: context.$store.state.clientData.userId
                     })
-                    .then(function() {
+                    .then(() => {
+                      console.log("Se modifica firestore");
+                      return documentsRef.get()
+                    })
+                    .then((doc) => {
+                      console.log("El valor de allowed users es:");
+                      console.log(doc.data().allowedUsers);
+                      var allowedUsers = doc.data().allowedUsers
+                      if (!allowedUsers.includes(user.uid)) {
+                        console.log("el usuario actual no estaba en allowed Users");
+                        console.log("Se modifica firestore");
+                        allowedUsers.push(user.uid)
+                        console.log("New allowed Users");
+                        console.log(allowedUsers);
+                        return documentsRef.update({
+                          allowedUsers: allowedUsers
+                        })
+                      } else {
+                        console.log("AllowedUsers ya contenia el usuario actual");
+                        console.log("usuario actual");
+                        console.log(user.uid);
+                        console.log("AllowedUsers");
+                        console.log(doc.data().allowedUsers);
+                      }
+
+
+                    })
+                    .then(() => {
                       console.log("Document successfully written!");
                       context.navigateToVal(documentPurchasedId);
                     })
@@ -264,6 +281,9 @@ export default {
       }
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/' + documentPurchasedId, config)
         .then((response) => {
+          console.log("Documento consultado");
+          console.log(response.data);
+          context.firebaseDocumentId = response.data.item
           providersRef.where("pviId", "==", parseInt(response.data.providerId)).get().then((querySnapshot) => {
             if (querySnapshot.size == 1) {
               querySnapshot.forEach(function(doc) {
