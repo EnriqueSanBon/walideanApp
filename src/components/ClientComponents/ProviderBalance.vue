@@ -46,6 +46,7 @@
 <script>
 import axios from 'axios';
 import consts from '../../consts.js';
+import { mapState } from 'vuex';
 
 export default {
   components: {},
@@ -78,6 +79,8 @@ export default {
     }
   },
   computed: {
+    ...mapState(['ethAddress']),
+
     animatedETH: function() {
       return this.tweenedETH.toFixed(5);
     },
@@ -112,7 +115,7 @@ export default {
         params: {
           'module': 'account',
           'action': 'balance',
-          'address': '0x09C564205bbfdfDA1dd6F7F905BE7E44d55FFed9'
+          'address': '0x' + this.ethAddress
         }
       }).then((response) => {
         context.ethBalance = response.data.result / Math.pow(10, 18);
@@ -124,7 +127,7 @@ export default {
         params: {
           'module': 'account',
           'action': 'tokenbalance',
-          'address': '0x09C564205bbfdfDA1dd6F7F905BE7E44d55FFed9',
+          'address': '0x' + this.ethAddress,
           'contractaddress': this.contractAddress
         }
       }).then((response) => {

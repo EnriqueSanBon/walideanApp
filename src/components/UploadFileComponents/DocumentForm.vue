@@ -134,7 +134,10 @@ export default {
       var firestore = firebase.firestore();
       var context = this;
       this.folderUUID = uuidv4();
-      var storageRef = storage.ref(this.folderUUID);
+      var user = firebase.auth().currentUser;
+      var storageRef = storage.ref(this.folderUUID + '/' + user.uid);
+      console.log("STORAGE REF");
+      console.log(storageRef);
       firestore.collection("documents").doc(context.folderUUID).set({
           allowedUsers: [user.uid],
           files: this.imageNames

@@ -85,9 +85,7 @@
 </template>
 
 <script>
-import {
-  mapState
-} from 'vuex';
+import { mapState } from 'vuex';
 import axios from 'axios';
 import consts from '../../consts.js';
 import firebase from "firebase";

@@ -49,13 +49,15 @@ export default {
       var context = this;
       var storage = firebase.storage();
       var storageRef = storage.ref();
+      var user = firebase.auth().currentUser;
+
       console.log("urls");
       console.log(this.urls);
       this.urls.forEach(function(url) {
         console.log("url");
         console.log(url);
         // Create a reference to the file we want to download
-        var imgRef = storageRef.child(storageUrl + '/' + url);
+        var imgRef = storageRef.child(storageUrl + '/' + user.uid + '/' + url);
         // Get the download URL
         imgRef.getDownloadURL()
           .then(function(downloadUrl) {
