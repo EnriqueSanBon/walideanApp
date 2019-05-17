@@ -7,7 +7,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {
+  mapState
+} from 'vuex';
 import consts from '../../consts.js';
 import firebase from "firebase";
 import axios from 'axios';
@@ -108,7 +110,8 @@ export default {
           if (!response.data.item) {
             console.log("No storage pointer");
           } else {
-            this.getImgUrls(response.data.item);
+            var user = firebase.auth().currentUser;
+            this.getImgUrls(response.data.item + user.uid);
           }
         })
     }

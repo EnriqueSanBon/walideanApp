@@ -85,7 +85,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {
+  mapState
+} from 'vuex';
 import axios from 'axios';
 import consts from '../../consts.js';
 import firebase from "firebase";
@@ -146,6 +148,42 @@ export default {
     navigateToVal: function(id) {
       this.$router.push('/document/' + id + '/validations');
     },
+    duplicateBucket: function(srcFilename, destFilename) {
+      console.log("funcion duplicate buckets");
+      console.log(srcFilename);
+      console.log(destFilename);
+      var createCopyBucket = firebase.functions().httpsCallable('createCopyBucket');
+      createCopyBucket({
+        destFilename: destFilename,
+        srcFilename: srcFilename
+      }).then(function(result) {
+        console.log("resultado cloud function");
+        console.log(result.data.text);
+      });
+    },
+    duplicateFile(storageUrl) {
+      console.log("Consulta direcciones");
+      console.log(storageUrl);
+      var context = this;
+      var firestore = firebase.firestore();
+      var documentsRef = firestore.collection("documents");
+      documentsRef.doc(storageUrl).get()
+        .then((documentSnapshot) => {
+          console.log("Document Snapshot");
+          console.log(documentSnapshot);
+          console.log(documentSnapshot.data());
+          var document = documentSnapshot.data();
+          if (document != null) {
+            context.urls = document.files
+            this.urls.forEach(function(url) {
+              return context.duplicateBucket(response.data.item, response.data.item + '/' + user.uid + '/' + url);
+
+            });
+          } else {
+            console.log("error");
+          }
+        })
+    },
     openModal(selectedDocId, selectedDocType) {
       this.dialog = true;
       this.selectedDocId = selectedDocId;
@@ -188,6 +226,7 @@ export default {
       var context = this;
       var firestore = firebase.firestore();
       var accessHistoryRef = firestore.collection("accessHistory");
+      var providersRef = firestore.collection("providers");
       var documentsRef = firestore.collection("documents").doc(this.firebaseDocumentId);
       var user = firebase.auth().currentUser;
       if (window.ethereum) {
@@ -233,12 +272,34 @@ export default {
                         console.log("AllowedUsers");
                         console.log(doc.data().allowedUsers);
                       }
-
-
                     })
                     .then(() => {
                       console.log("Document successfully written!");
-                      context.navigateToVal(documentPurchasedId);
+                      let config = {
+                        headers: {
+                          'securityCode': context.token
+                        },
+                        withCredentials: true
+                      }
+                      console.log("la llamada que falla es");
+                      console.log(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + documentPurchasedId);
+                      return axios.get(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + documentPurchasedId, config)
+                        .then((response) => {
+                          console.log("Document Info");
+                          console.log(response.data);
+                          if (!response.data.item) {
+                            console.log("No storage pointer");
+                          } else {
+                            var user = firebase.auth().currentUser;
+                            var query = providersRef.where("pviId", "==", response.data.providerId);
+                            console.log("la query es");
+                            console.log(query);
+                            return context.duplicateFiles(response.data.item + '/' + user.uid)
+                          }
+                        })
+                        .then(() => {
+                          context.navigateToVal(documentPurchasedId);
+                        })
                     })
                     .catch(function(error) {
                       console.error("Error writing document: ", error);
