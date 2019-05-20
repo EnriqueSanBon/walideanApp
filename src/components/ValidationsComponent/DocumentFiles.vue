@@ -111,7 +111,7 @@ export default {
             console.log("No storage pointer");
           } else {
             var user = firebase.auth().currentUser;
-            this.getImgUrls(response.data.item + user.uid);
+            this.getImgUrls(response.data.item);
           }
         })
     }

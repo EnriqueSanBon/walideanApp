@@ -149,9 +149,7 @@ export default {
       this.$router.push('/document/' + id + '/validations');
     },
     duplicateBucket: function(srcFilename, destFilename) {
-      console.log("funcion duplicate buckets");
-      console.log(srcFilename);
-      console.log(destFilename);
+      var context = this;
       var createCopyBucket = firebase.functions().httpsCallable('createCopyBucket');
       createCopyBucket({
         destFilename: destFilename,
@@ -161,9 +159,12 @@ export default {
         console.log(result.data.text);
       });
     },
-    duplicateFile(storageUrl) {
+    duplicateFile(storageUrl, ownerUID, buyerUID) {
+      console.log("Entra en duplicate files");
       console.log("Consulta direcciones");
       console.log(storageUrl);
+      console.log(ownerUID);
+      console.log(buyerUID);
       var context = this;
       var firestore = firebase.firestore();
       var documentsRef = firestore.collection("documents");
@@ -176,8 +177,7 @@ export default {
           if (document != null) {
             context.urls = document.files
             this.urls.forEach(function(url) {
-              return context.duplicateBucket(response.data.item, response.data.item + '/' + user.uid + '/' + url);
-
+              context.duplicateBucket(storageUrl + '/' + ownerUID + '/' + url, storageUrl + '/' + buyerUID + '/' + url);
             });
           } else {
             console.log("error");
@@ -291,15 +291,26 @@ export default {
                             console.log("No storage pointer");
                           } else {
                             var user = firebase.auth().currentUser;
-                            var query = providersRef.where("pviId", "==", response.data.providerId);
-                            console.log("la query es");
-                            console.log(query);
-                            return context.duplicateFiles(response.data.item + '/' + user.uid)
+                            providersRef.where("pviId", "==", parseInt(response.data.providerId)).get()
+                              .then((querySnapshot) => {
+                                console.log("tamaño consulta");
+                                console.log(querySnapshot.size);
+                                if (querySnapshot.size > 0) {
+                                  console.log("Dueño del documento encontrado");
+                                  querySnapshot.forEach(async function(doc) {
+                                    console.log(doc.data());
+                                    await new Promise((resolve, reject) => {
+                                      context.duplicateFile(response.data.item, doc.data().UID, user.uid)
+                                    });
+                                    //context.navigateToVal(documentPurchasedId);
+                                  })
+                                  console.log("Ha terminado todo");
+                                  context.navigateToVal(documentPurchasedId);
+                                }
+                              })
                           }
                         })
-                        .then(() => {
-                          context.navigateToVal(documentPurchasedId);
-                        })
+
                     })
                     .catch(function(error) {
                       console.error("Error writing document: ", error);
@@ -364,6 +375,7 @@ export default {
                       context.navigateToVal(documentPurchasedId);
                     });
                 } else {
+                  console.log("nepon pepon");
                   context.purchaseDocumentTransaction(doc.data().ethAddress, documentPurchasedId)
                 }
               });
