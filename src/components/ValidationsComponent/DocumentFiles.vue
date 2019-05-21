@@ -17,7 +17,6 @@ export default {
   computed: mapState(['clientData', 'token']),
   components: {},
   mounted() {
-    console.log("Se monta");
     this.getDocumentInfo();
   },
   data() {
@@ -28,16 +27,12 @@ export default {
   },
   methods: {
     getImgUrls(storageUrl) {
-      console.log("Consulta direcciones");
-      console.log(storageUrl);
+
       var context = this;
       var firestore = firebase.firestore();
       var documentsRef = firestore.collection("documents");
       documentsRef.doc(storageUrl).get()
         .then((documentSnapshot) => {
-          console.log("Document Snapshot");
-          console.log(documentSnapshot);
-          console.log(documentSnapshot.data());
           var document = documentSnapshot.data();
           if (document != null) {
             context.urls = document.files
@@ -95,7 +90,6 @@ export default {
 
     },
     getDocumentInfo() {
-      console.log("nepe");
       var context = this;
       let config = {
         headers: {

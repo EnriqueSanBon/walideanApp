@@ -149,40 +149,54 @@ export default {
       this.$router.push('/document/' + id + '/validations');
     },
     duplicateBucket: function(srcFilename, destFilename) {
-      var context = this;
-      var createCopyBucket = firebase.functions().httpsCallable('createCopyBucket');
-      createCopyBucket({
-        destFilename: destFilename,
-        srcFilename: srcFilename
-      }).then(function(result) {
-        console.log("resultado cloud function");
-        console.log(result.data.text);
-      });
+      const promise = new Promise(function(resolve, reject) {
+        console.log("Empieza duplicate bucket");
+        var createCopyBucket = firebase.functions().httpsCallable('createCopyBucket');
+        createCopyBucket({
+            destFilename: destFilename,
+            srcFilename: srcFilename
+          }).then((result) => {
+            console.log("resultado cloud function");
+            console.log(result.data.text);
+            console.log("Termina duplicate bucket");
+            resolve('OK')
+          })
+          .catch(() => {
+            reject('error in duplicate bucket')
+          })
+      })
+      return promise
     },
     duplicateFile(storageUrl, ownerUID, buyerUID) {
-      console.log("Entra en duplicate files");
-      console.log("Consulta direcciones");
-      console.log(storageUrl);
-      console.log(ownerUID);
-      console.log(buyerUID);
       var context = this;
-      var firestore = firebase.firestore();
-      var documentsRef = firestore.collection("documents");
-      documentsRef.doc(storageUrl).get()
-        .then((documentSnapshot) => {
-          console.log("Document Snapshot");
-          console.log(documentSnapshot);
-          console.log(documentSnapshot.data());
-          var document = documentSnapshot.data();
-          if (document != null) {
-            context.urls = document.files
-            this.urls.forEach(function(url) {
-              context.duplicateBucket(storageUrl + '/' + ownerUID + '/' + url, storageUrl + '/' + buyerUID + '/' + url);
-            });
-          } else {
-            console.log("error");
-          }
-        })
+      const promise = new Promise((resolve, reject) => {
+        console.log("Empieza duplicate file");
+        var firestore = firebase.firestore();
+        var documentsRef = firestore.collection("documents");
+        var urls = []
+        documentsRef.doc(storageUrl).get()
+          .then((documentSnapshot) => {
+            var document = documentSnapshot.data();
+            if (document != null) {
+              urls = document.files
+              var count = urls.length
+              urls.forEach(async function(url) {
+                context.duplicateBucket(storageUrl + '/' + ownerUID + '/' + url, storageUrl + '/' + buyerUID + '/' + url)
+                  .then(() => {
+                    count--
+                    if (count <= 0) {
+                      console.log("termina duplicate file");
+                      resolve('OK')
+                    }
+                  })
+              });
+            } else {
+              console.log("error");
+              reject('error')
+            }
+          })
+      })
+      return promise;
     },
     openModal(selectedDocId, selectedDocType) {
       this.dialog = true;
@@ -204,7 +218,6 @@ export default {
             element.processDateString = [element.processDate.toString().slice(0, 4), "-", element.processDate.toString().slice(4, 6), "-", element.processDate.toString().slice(6)].join('');
             return element
           });
-          console.log(this.gridData);
           this.oldDocuments = this.gridData.filter(document => document.expirationDate < today)
           this.newDocuments = this.gridData.filter(document => document.expirationDate > today)
           if (response.data.documents.length == 0) {
@@ -249,28 +262,16 @@ export default {
                       userId: context.$store.state.clientData.userId
                     })
                     .then(() => {
-                      console.log("Se modifica firestore");
                       return documentsRef.get()
                     })
                     .then((doc) => {
-                      console.log("El valor de allowed users es:");
-                      console.log(doc.data().allowedUsers);
                       var allowedUsers = doc.data().allowedUsers
                       if (!allowedUsers.includes(user.uid)) {
-                        console.log("el usuario actual no estaba en allowed Users");
-                        console.log("Se modifica firestore");
+                        //console.log("el usuario actual no estaba en allowed Users");
                         allowedUsers.push(user.uid)
-                        console.log("New allowed Users");
-                        console.log(allowedUsers);
                         return documentsRef.update({
                           allowedUsers: allowedUsers
                         })
-                      } else {
-                        console.log("AllowedUsers ya contenia el usuario actual");
-                        console.log("usuario actual");
-                        console.log(user.uid);
-                        console.log("AllowedUsers");
-                        console.log(doc.data().allowedUsers);
                       }
                     })
                     .then(() => {
@@ -281,36 +282,28 @@ export default {
                         },
                         withCredentials: true
                       }
-                      console.log("la llamada que falla es");
-                      console.log(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + documentPurchasedId);
                       return axios.get(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + documentPurchasedId, config)
                         .then((response) => {
-                          console.log("Document Info");
-                          console.log(response.data);
                           if (!response.data.item) {
-                            console.log("No storage pointer");
+                            console.log("file not stored in Firebase");
+                            //error
                           } else {
                             var user = firebase.auth().currentUser;
                             providersRef.where("pviId", "==", parseInt(response.data.providerId)).get()
                               .then((querySnapshot) => {
-                                console.log("tamaño consulta");
-                                console.log(querySnapshot.size);
-                                if (querySnapshot.size > 0) {
-                                  console.log("Dueño del documento encontrado");
+                                if (querySnapshot.size > 0) { //Provider found
                                   querySnapshot.forEach(async function(doc) {
-                                    console.log(doc.data());
-                                    await new Promise((resolve, reject) => {
-                                      context.duplicateFile(response.data.item, doc.data().UID, user.uid)
-                                    });
+                                    context.duplicateFile(response.data.item, doc.data().UID, user.uid).then(() => {
+                                      console.log("Todo subido");
+                                      context.navigateToVal(documentPurchasedId);
+                                    })
+
                                     //context.navigateToVal(documentPurchasedId);
                                   })
-                                  console.log("Ha terminado todo");
-                                  context.navigateToVal(documentPurchasedId);
                                 }
                               })
                           }
                         })
-
                     })
                     .catch(function(error) {
                       console.error("Error writing document: ", error);
@@ -351,8 +344,6 @@ export default {
       }
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/' + documentPurchasedId, config)
         .then((response) => {
-          console.log("Documento consultado");
-          console.log(response.data);
           context.firebaseDocumentId = response.data.item
           providersRef.where("pviId", "==", parseInt(response.data.providerId)).get().then((querySnapshot) => {
             if (querySnapshot.size == 1) {
@@ -375,7 +366,6 @@ export default {
                       context.navigateToVal(documentPurchasedId);
                     });
                 } else {
-                  console.log("nepon pepon");
                   context.purchaseDocumentTransaction(doc.data().ethAddress, documentPurchasedId)
                 }
               });
