@@ -158,7 +158,6 @@ export default {
           }).then((result) => {
             console.log("resultado cloud function");
             console.log(result.data.text);
-            console.log("Termina duplicate bucket");
             resolve('OK')
           })
           .catch(() => {
@@ -170,7 +169,6 @@ export default {
     duplicateFile(storageUrl, ownerUID, buyerUID) {
       var context = this;
       const promise = new Promise((resolve, reject) => {
-        console.log("Empieza duplicate file");
         var firestore = firebase.firestore();
         var documentsRef = firestore.collection("documents");
         var urls = []
@@ -185,7 +183,6 @@ export default {
                   .then(() => {
                     count--
                     if (count <= 0) {
-                      console.log("termina duplicate file");
                       resolve('OK')
                     }
                   })
@@ -294,7 +291,6 @@ export default {
                                 if (querySnapshot.size > 0) { //Provider found
                                   querySnapshot.forEach(async function(doc) {
                                     context.duplicateFile(response.data.item, doc.data().UID, user.uid).then(() => {
-                                      console.log("Todo subido");
                                       context.navigateToVal(documentPurchasedId);
                                     })
 
