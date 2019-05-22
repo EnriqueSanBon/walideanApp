@@ -12,6 +12,7 @@
             </v-flex>
           </v-layout>
           <v-btn round color="secondary" class="primary--text" dark @click="searchClient(true).catch((err) => {snackbar = true; snackbarText = err.message;})">Send Token</v-btn>
+          <p>User not found? <b @click="$router.push('/NewFinalUser')">Register it</b></p>
           <v-text-field v-model="token" label="Received Token" required></v-text-field>
           <v-btn round color="secondary" class="primary--text" dark @click="getClient()">Check User</v-btn>
         </v-flex>

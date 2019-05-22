@@ -10,6 +10,7 @@ import ValidateDocument from './views/ValidateDocument.vue'
 import UserPanel from './views/UserPanel.vue'
 import UserTokenRequest from './views/UserTokenRequest.vue'
 import Statics from './views/Statics.vue'
+import NewFinalUser from './views/NewFinalUser.vue'
 
 Vue.use(Router)
 
@@ -47,8 +48,12 @@ export default new Router({
       props: true
     }, {
       path: '/Statics/',
-      component: Statics
+      component: Statics,
     }, {
+      path: '/NewFinalUser/',
+      component: NewFinalUser
+    },
+    {
       path: '/UserPanel/',
       component: UserPanel
     },
