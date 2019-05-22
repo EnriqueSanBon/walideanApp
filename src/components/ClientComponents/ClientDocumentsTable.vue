@@ -35,11 +35,6 @@
             mobile_friendly
           </v-icon>
         </v-btn>
-        <!--<v-btn icon>
-          <v-icon @click="navigateToDoc(props.item.id)">
-            wallpaper
-          </v-icon>
-        </v-btn>-->
       </td>
     </template>
   </v-data-table>
@@ -77,11 +72,6 @@
             mobile_friendly
           </v-icon>
         </v-btn>
-        <!--<v-btn icon>
-          <v-icon @click="navigateToDoc(props.item.id)">
-            wallpaper
-          </v-icon>
-        </v-btn>-->
       </td>
     </template>
   </v-data-table>
@@ -113,6 +103,7 @@ export default {
   data() {
     return {
       searchQuery: '',
+      firebaseDocumentId: '',
       gridData: [],
       oldDocuments: [],
       newDocuments: [],
@@ -154,11 +145,55 @@ export default {
     }
   },
   methods: {
-    navigateToDoc: function(id) {
-      this.$router.push('/document/:' + id);
-    },
     navigateToVal: function(id) {
       this.$router.push('/document/' + id + '/validations');
+    },
+    duplicateBucket: function(srcFilename, destFilename) {
+      const promise = new Promise(function(resolve, reject) {
+        console.log("Empieza duplicate bucket");
+        var createCopyBucket = firebase.functions().httpsCallable('createCopyBucket');
+        createCopyBucket({
+            destFilename: destFilename,
+            srcFilename: srcFilename
+          }).then((result) => {
+            console.log("resultado cloud function");
+            console.log(result.data.text);
+            resolve('OK')
+          })
+          .catch(() => {
+            reject('error in duplicate bucket')
+          })
+      })
+      return promise
+    },
+    duplicateFile(storageUrl, ownerUID, buyerUID) {
+      var context = this;
+      const promise = new Promise((resolve, reject) => {
+        var firestore = firebase.firestore();
+        var documentsRef = firestore.collection("documents");
+        var urls = []
+        documentsRef.doc(storageUrl).get()
+          .then((documentSnapshot) => {
+            var document = documentSnapshot.data();
+            if (document != null) {
+              urls = document.files
+              var count = urls.length
+              urls.forEach(async function(url) {
+                context.duplicateBucket(storageUrl + '/' + ownerUID + '/' + url, storageUrl + '/' + buyerUID + '/' + url)
+                  .then(() => {
+                    count--
+                    if (count <= 0) {
+                      resolve('OK')
+                    }
+                  })
+              });
+            } else {
+              console.log("error");
+              reject('error')
+            }
+          })
+      })
+      return promise;
     },
     openModal(selectedDocId, selectedDocType) {
       this.dialog = true;
@@ -180,7 +215,6 @@ export default {
             element.processDateString = [element.processDate.toString().slice(0, 4), "-", element.processDate.toString().slice(4, 6), "-", element.processDate.toString().slice(6)].join('');
             return element
           });
-          console.log(this.gridData);
           this.oldDocuments = this.gridData.filter(document => document.expirationDate < today)
           this.newDocuments = this.gridData.filter(document => document.expirationDate > today)
           if (response.data.documents.length == 0) {
@@ -202,6 +236,9 @@ export default {
       var context = this;
       var firestore = firebase.firestore();
       var accessHistoryRef = firestore.collection("accessHistory");
+      var providersRef = firestore.collection("providers");
+      var documentsRef = firestore.collection("documents").doc(this.firebaseDocumentId);
+      var user = firebase.auth().currentUser;
       if (window.ethereum) {
         window.web3 = new Web3(ethereum);
         try { // Solicitar autorización a MetaMask (si fuese necesario)
@@ -221,9 +258,48 @@ export default {
                       providerId: context.$store.state.providerId,
                       userId: context.$store.state.clientData.userId
                     })
-                    .then(function() {
+                    .then(() => {
+                      return documentsRef.get()
+                    })
+                    .then((doc) => {
+                      var allowedUsers = doc.data().allowedUsers
+                      if (!allowedUsers.includes(user.uid)) {
+                        //console.log("el usuario actual no estaba en allowed Users");
+                        allowedUsers.push(user.uid)
+                        return documentsRef.update({
+                          allowedUsers: allowedUsers
+                        })
+                      }
+                    })
+                    .then(() => {
                       console.log("Document successfully written!");
-                      context.navigateToVal(documentPurchasedId);
+                      let config = {
+                        headers: {
+                          'securityCode': context.token
+                        },
+                        withCredentials: true
+                      }
+                      return axios.get(consts.ipPVIService + 'resources/users/' + context.clientData.userId + '/documents/' + documentPurchasedId, config)
+                        .then((response) => {
+                          if (!response.data.item) {
+                            console.log("file not stored in Firebase");
+                            //error
+                          } else {
+                            var user = firebase.auth().currentUser;
+                            providersRef.where("pviId", "==", parseInt(response.data.providerId)).get()
+                              .then((querySnapshot) => {
+                                if (querySnapshot.size > 0) { //Provider found
+                                  querySnapshot.forEach(async function(doc) {
+                                    context.duplicateFile(response.data.item, doc.data().UID, user.uid).then(() => {
+                                      context.navigateToVal(documentPurchasedId);
+                                    })
+
+                                    //context.navigateToVal(documentPurchasedId);
+                                  })
+                                }
+                              })
+                          }
+                        })
                     })
                     .catch(function(error) {
                       console.error("Error writing document: ", error);
@@ -264,6 +340,7 @@ export default {
       }
       axios.get(consts.ipPVIService + 'resources/users/' + this.clientData.userId + '/documents/' + documentPurchasedId, config)
         .then((response) => {
+          context.firebaseDocumentId = response.data.item
           providersRef.where("pviId", "==", parseInt(response.data.providerId)).get().then((querySnapshot) => {
             if (querySnapshot.size == 1) {
               querySnapshot.forEach(function(doc) {

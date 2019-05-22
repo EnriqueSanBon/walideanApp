@@ -129,13 +129,17 @@ export default {
       this.imageNamesString = this.imageNames.toString();
     },
     uploadDocument() {
+      var user = firebase.auth().currentUser;
       var storage = firebase.storage();
       var firestore = firebase.firestore();
       var context = this;
       this.folderUUID = uuidv4();
-      var storageRef = storage.ref(this.folderUUID);
+      var user = firebase.auth().currentUser;
+      var storageRef = storage.ref(this.folderUUID + '/' + user.uid);
+      console.log("STORAGE REF");
+      console.log(storageRef);
       firestore.collection("documents").doc(context.folderUUID).set({
-          allowedUsers: [],
+          allowedUsers: [user.uid],
           files: this.imageNames
         })
         .then(function() {

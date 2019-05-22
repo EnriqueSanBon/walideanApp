@@ -7,7 +7,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {
+  mapState
+} from 'vuex';
 import consts from '../../consts.js';
 import firebase from "firebase";
 import axios from 'axios';
@@ -15,7 +17,6 @@ export default {
   computed: mapState(['clientData', 'token']),
   components: {},
   mounted() {
-    console.log("Se monta");
     this.getDocumentInfo();
   },
   data() {
@@ -26,16 +27,12 @@ export default {
   },
   methods: {
     getImgUrls(storageUrl) {
-      console.log("Consulta direcciones");
-      console.log(storageUrl);
+
       var context = this;
       var firestore = firebase.firestore();
       var documentsRef = firestore.collection("documents");
       documentsRef.doc(storageUrl).get()
         .then((documentSnapshot) => {
-          console.log("Document Snapshot");
-          console.log(documentSnapshot);
-          console.log(documentSnapshot.data());
           var document = documentSnapshot.data();
           if (document != null) {
             context.urls = document.files
@@ -49,13 +46,15 @@ export default {
       var context = this;
       var storage = firebase.storage();
       var storageRef = storage.ref();
+      var user = firebase.auth().currentUser;
+
       console.log("urls");
       console.log(this.urls);
       this.urls.forEach(function(url) {
         console.log("url");
         console.log(url);
         // Create a reference to the file we want to download
-        var imgRef = storageRef.child(storageUrl + '/' + url);
+        var imgRef = storageRef.child(storageUrl + '/' + user.uid + '/' + url);
         // Get the download URL
         imgRef.getDownloadURL()
           .then(function(downloadUrl) {
@@ -91,7 +90,6 @@ export default {
 
     },
     getDocumentInfo() {
-      console.log("nepe");
       var context = this;
       let config = {
         headers: {
@@ -106,6 +104,7 @@ export default {
           if (!response.data.item) {
             console.log("No storage pointer");
           } else {
+            var user = firebase.auth().currentUser;
             this.getImgUrls(response.data.item);
           }
         })

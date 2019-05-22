@@ -19,7 +19,7 @@
             </template>
             <template v-if="loaded >= 100">
               <h1>Transaction successed</h1>
-              <v-btn round color="primary" class="secondary--text" small dark @click="$router.push('/client', () => console.log('Ruta cambiada'));">Return to Client Data</v-btn>
+              <v-btn round color="primary" class="secondary--text" small dark @click="$router.push('/client');">Return to Client Data</v-btn>
 
             </template>
           </v-progress-circular>
